@@ -1,12 +1,12 @@
 # PowerShell Cloud Automation Portfolio
 
-This repository is a planned portfolio of PowerShell projects for IT automation, Microsoft 365 administration, Azure, and DevOps. It currently contains the folder structure and documentation placeholders only. No scripts or projects have been implemented yet.
+This repository is a PowerShell portfolio for IT automation, Microsoft 365 administration, Azure, and DevOps. Project 01 has an initial v0.1 script; the other projects remain planned.
 
 ## Projects
 
 | Project | Focus | Status |
 | --- | --- | --- |
-| [01 — M365 User Audit](projects/01-m365-user-audit/README.md) | Microsoft Graph and user reporting | Planned |
+| [01 — M365 User Audit](projects/01-m365-user-audit/README.md) | Microsoft Graph and user reporting | v0.1 |
 | [02 — Workstation Health Check](projects/02-workstation-health-check/README.md) | Windows administration | Planned |
 | [03 — M365 License Audit](projects/03-m365-license-audit/README.md) | License reporting | Planned |
 | [04 — M365 Security Assessment](projects/04-m365-security-assessment/README.md) | Security checks | Planned |
