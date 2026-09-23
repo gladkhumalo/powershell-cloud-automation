@@ -1,0 +1,23 @@
+# Secrets and credentials
+*.secret
+*.key
+*.pfx
+*.cer
+.env
+secrets.json
+credentials.json
+
+# Generated project output (retain folder placeholders)
+**/output/*
+!**/output/.gitkeep
+
+# Logs and temporary files
+*.log
+*.clixml
+*.tmp
+*.temp
+
+# Editors and operating systems
+.vscode/
+Thumbs.db
+.DS_Store
