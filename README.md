@@ -7,7 +7,7 @@ This repository is a PowerShell portfolio for IT automation, Microsoft 365 admin
 | Project | Focus | Status |
 | --- | --- | --- |
 | [01 — M365 User Audit](projects/01-m365-user-audit/README.md) | Microsoft Graph and user reporting | v0.1 |
-| [02 — Workstation Health Check](projects/02-workstation-health-check/README.md) | Windows administration | Planned |
+| [02 — Workstation Health Check](projects/02-workstation-health-check/README.md) | Windows administration | Discovery in progress |
 | [03 — M365 License Audit](projects/03-m365-license-audit/README.md) | License reporting | Planned |
 | [04 — M365 Security Assessment](projects/04-m365-security-assessment/README.md) | Security checks | Planned |
 | [05 — Azure Resource Inventory](projects/05-azure-resource-inventory/README.md) | Azure reporting | Planned |
