@@ -30,4 +30,3 @@ Each project has `src/`, `tests/`, `examples/`, `output/`, and `screenshots/` fo
 ## Learning path
 
 Windows and M365 administration → Microsoft Graph → Azure automation → reusable modules and testing → CI/CD and runbooks. See [learning roadmap](docs/learning-roadmap.md).
-
