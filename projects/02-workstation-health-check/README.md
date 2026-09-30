@@ -42,4 +42,3 @@ The script was run on a Windows workstation and returned one report object with 
 ## Later milestones
 
 Add networking, pending reboot, Defender, event logs, remote computers, and automated tests.
-
