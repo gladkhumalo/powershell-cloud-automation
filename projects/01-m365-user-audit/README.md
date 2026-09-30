@@ -1,4 +1,4 @@
-# 01 — M365 User Audit
+# 01 - M365 User Audit
 
 **Status:** v0.1 — basic CSV export
 
