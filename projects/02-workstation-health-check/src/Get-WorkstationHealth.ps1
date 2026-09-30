@@ -39,4 +39,3 @@ $disks = @($fixedDisks | ForEach-Object {
     MemoryUsedPercent = if ($memoryTotalKB -gt 0) { [math]::Round(100 * ($memoryTotalKB - $memoryFreeKB) / $memoryTotalKB, 1) } else { $null }
     FixedDisks        = $disks
 }
-
