@@ -6,4 +6,8 @@
 4. Modules, Pester tests, and script analysis
 5. GitHub Actions, runbooks, and managed identities
 
-Record completed milestones and links to the relevant projects here.
+## Completed milestones
+
+- [M365 user audit v0.1](../projects/01-m365-user-audit/README.md): Graph user retrieval and CSV export.
+- [Workstation health report v0.1](../projects/02-workstation-health-check/README.md): local CIM report with Pester tests.
+- [M365 license capacity audit v0.1](../projects/03-m365-license-audit/README.md): subscribed SKU CSV with offline Pester tests; live tenant validation is pending.

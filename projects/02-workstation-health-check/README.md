@@ -1,18 +1,24 @@
 # 02 — Workstation Health Check
 
-**Status:** Discovery step for v0.1
+**Status:** v0.1 — local workstation report
 
-This project will turn Windows troubleshooting data into a clear workstation health report. The current script intentionally runs only four raw CIM queries. It does not build a health object or export a file yet.
+This script reads four Windows CIM classes and returns one PowerShell object describing the local workstation. It does not write a file or change system settings.
 
-## Run the discovery script
+## Run
 
-On Windows, from the repository root:
+Requirements: Windows and PowerShell 7.2 or newer. From the repository root:
 
 ```powershell
-./projects/02-workstation-health-check/src/Get-WorkstationHealth.ps1
+$health = ./projects/02-workstation-health-check/src/Get-WorkstationHealth.ps1
+$health | Format-List
+$health.FixedDisks | Format-Table
 ```
 
-To learn what each class returns, run a query on its own and inspect its properties:
+The report includes computer name, logged-on user, Windows name and version, last boot time, uptime in days, processor name, average CPU load, total and free memory in GiB, memory used percentage, and fixed-disk details. Each disk has its drive letter, size and free space in GiB, and free percentage. Property names use `GB` for readability; calculations divide by powers of 1024.
+
+CPU load is a recent CIM sample, not continuous monitoring. Windows can return no sample; `CpuLoadPercent` is then `$null`. Percentages are also `$null` if their total size is zero. `LoggedOnUser` can be empty when Windows does not report a console user.
+
+To inspect the source data, run a query on its own:
 
 ```powershell
 $os = Get-CimInstance -ClassName Win32_OperatingSystem
@@ -20,19 +26,27 @@ $os | Get-Member -MemberType Property
 $os | Select-Object Caption, Version, LastBootUpTime, TotalVisibleMemorySize, FreePhysicalMemory
 ```
 
-Repeat that pattern with `Win32_ComputerSystem`, `Win32_Processor`, and `Win32_LogicalDisk -Filter 'DriveType=3'`. The script itself leaves the objects raw so you can see what Windows supplies before deciding how to shape the report.
+Repeat that pattern with `Win32_ComputerSystem`, `Win32_Processor`, and `Win32_LogicalDisk -Filter 'DriveType=3'`.
 
 ## Properties identified
 
-| CIM class | Properties useful for the planned report | Detail to remember |
+| CIM class | Properties used | Detail to remember |
 | --- | --- | --- |
 | [`Win32_OperatingSystem`](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-operatingsystem) | `Caption`, `Version`, `LastBootUpTime`, `TotalVisibleMemorySize`, `FreePhysicalMemory` | The two memory values are in kilobytes. |
 | [`Win32_ComputerSystem`](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-computersystem) | `Name`, `UserName`, `TotalPhysicalMemory` | Total physical memory is in bytes; `UserName` refers to the console user in a terminal-services scenario. |
 | [`Win32_Processor`](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-processor) | `Name`, `LoadPercentage` | Load percentage is a recent sample for each processor. |
 | [`Win32_LogicalDisk`](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-logicaldisk) | `DeviceID`, `DriveType`, `Size`, `FreeSpace` | `DriveType=3` selects fixed disks; size and free space are in bytes. |
 
-The four classes were inspected on a Windows workstation. No machine-specific values or output files are committed.
+The script was run on a Windows workstation and returned one report object with fixed-disk data. No machine-specific values or output files are committed.
 
-## Next step
+Run the Pester tests from the repository root with:
 
-Use the raw objects to build one `[pscustomobject]` with computer name, logged-in user, Windows version, uptime, CPU, memory, and disk fields. Later milestones will add networking, pending reboot, Defender, event logs, remote computers, and tests.
+```powershell
+Invoke-Pester ./projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1
+```
+
+The tests mock CIM data to check memory, CPU, disk, and uptime calculations, plus missing CPU samples and zero-sized totals. They pass with Pester 3.4 and PowerShell 7.6.
+
+## Later milestones
+
+Add networking, pending reboot, Defender, event logs, remote computers, and broader tests for those features.
