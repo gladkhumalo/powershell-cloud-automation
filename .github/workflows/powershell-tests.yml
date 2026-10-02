@@ -1,0 +1,33 @@
+name: PowerShell tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pester:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Pester 3.4
+        shell: pwsh
+        run: Install-Module Pester -RequiredVersion 3.4.0 -Scope CurrentUser -Force -SkipPublisherCheck
+
+      - name: Run offline tests
+        shell: pwsh
+        run: |
+          Import-Module Pester -RequiredVersion 3.4.0
+          $paths = @(
+            './projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1'
+            './projects/03-m365-license-audit/tests/Export-M365LicenseReport.Tests.ps1'
+          )
+          $result = Invoke-Pester -Path $paths -PassThru
+          if ($result.FailedCount -gt 0 -or $result.TotalCount -eq 0) { exit 1 }

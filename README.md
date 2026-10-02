@@ -10,11 +10,13 @@ The workstation health check runs locally on Windows:
 ./projects/02-workstation-health-check/src/Get-WorkstationHealth.ps1 | Format-List
 ```
 
-The Microsoft 365 projects require Graph modules and a tenant sign-in. Start with their project READMEs for prerequisites. To run the offline tests for Projects 02 and 03:
+The Microsoft 365 projects require Graph modules and a tenant sign-in. Start with their project READMEs for prerequisites. To run the offline tests for Projects 02 and 03 with Pester 3.4:
 
 ```powershell
 Invoke-Pester ./projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1, ./projects/03-m365-license-audit/tests/Export-M365LicenseReport.Tests.ps1
 ```
+
+GitHub Actions runs those tests on pushes and pull requests to `main`. The Graph connection still needs a manual tenant check.
 
 ## Projects
 
