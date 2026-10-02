@@ -39,6 +39,14 @@ Repeat that pattern with `Win32_ComputerSystem`, `Win32_Processor`, and `Win32_L
 
 The script was run on a Windows workstation and returned one report object with fixed-disk data. No machine-specific values or output files are committed.
 
+Run the Pester tests from the repository root with:
+
+```powershell
+Invoke-Pester ./projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1
+```
+
+The tests mock CIM data to check memory, CPU, disk, and uptime calculations, plus missing CPU samples and zero-sized totals. They pass with Pester 3.4 and PowerShell 7.6.
+
 ## Later milestones
 
-Add networking, pending reboot, Defender, event logs, remote computers, and automated tests.
+Add networking, pending reboot, Defender, event logs, remote computers, and broader tests for those features.

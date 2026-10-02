@@ -1,6 +1,20 @@
 # PowerShell Cloud Automation Portfolio
 
-This repository is a PowerShell portfolio for IT automation, Microsoft 365 administration, Azure, and DevOps. Projects 01 and 02 have initial v0.1 scripts; the other projects remain planned.
+Hands-on PowerShell projects for Windows administration and Microsoft 365 reporting. Each project has a focused script, run instructions, and a place for tests and examples. Projects 01–03 have v0.1 implementations; the remaining projects are planned.
+
+## Try a project
+
+The workstation health check runs locally on Windows:
+
+```powershell
+./projects/02-workstation-health-check/src/Get-WorkstationHealth.ps1 | Format-List
+```
+
+The Microsoft 365 projects require Graph modules and a tenant sign-in. Start with their project READMEs for prerequisites. To run the offline tests for Projects 02 and 03:
+
+```powershell
+Invoke-Pester ./projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1, ./projects/03-m365-license-audit/tests/Export-M365LicenseReport.Tests.ps1
+```
 
 ## Projects
 
@@ -8,7 +22,7 @@ This repository is a PowerShell portfolio for IT automation, Microsoft 365 admin
 | --- | --- | --- |
 | [01 — M365 User Audit](projects/01-m365-user-audit/README.md) | Microsoft Graph and user reporting | v0.1 |
 | [02 — Workstation Health Check](projects/02-workstation-health-check/README.md) | Windows administration | v0.1 |
-| [03 — M365 License Audit](projects/03-m365-license-audit/README.md) | License reporting | Planned |
+| [03 — M365 License Audit](projects/03-m365-license-audit/README.md) | License reporting | v0.1 |
 | [04 — M365 Security Assessment](projects/04-m365-security-assessment/README.md) | Security checks | Planned |
 | [05 — Azure Resource Inventory](projects/05-azure-resource-inventory/README.md) | Azure reporting | Planned |
 | [06 — Azure VM Health Check](projects/06-azure-vm-health-check/README.md) | Azure operations | Planned |
@@ -25,7 +39,7 @@ This repository is a PowerShell portfolio for IT automation, Microsoft 365 admin
 - `.github/` — future workflows and contribution templates
 - `config/` — future example settings and analyzer configuration
 
-Each project has `src/`, `tests/`, `examples/`, `output/`, and `screenshots/` folders. The `.gitkeep` files make empty folders visible in Git; remove them when real content is added.
+Each project has `src/`, `tests/`, `examples/`, `output/`, and `screenshots/` folders. Empty folders contain `.gitkeep` files. Generated reports in `output/` are ignored by Git.
 
 ## Learning path
 
