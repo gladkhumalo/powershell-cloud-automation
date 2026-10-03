@@ -26,6 +26,7 @@ jobs:
         run: |
           Import-Module Pester -RequiredVersion 3.4.0
           $paths = @(
+            './projects/01-m365-user-audit/tests/Export-M365UserReport.Tests.ps1'
             './projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1'
             './projects/03-m365-license-audit/tests/Export-M365LicenseReport.Tests.ps1'
           )
