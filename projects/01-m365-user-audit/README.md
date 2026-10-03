@@ -8,7 +8,7 @@ This first milestone retrieves users from Microsoft Graph and writes a focused C
 
 1. Checks for `Microsoft.Graph.Authentication` and `Microsoft.Graph.Users`.
 2. Opens a device-code Graph session with delegated `User.Read.All` permission.
-3. Retrieves all users and selects six properties: display name, user principal name, account enabled, user type, department, and job title.
+3. Retrieves all users and exports six properties: display name, user principal name, account enabled, user type, department, and job title.
 4. Exports those properties to UTF-8 CSV and disconnects from Graph.
 
 `User.Read.All` may require administrator consent in your tenant. The script reads user data; it does not modify accounts.
@@ -43,12 +43,20 @@ Review the CSV locally. It may contain personal and tenant information; `output/
 
 ## Validation
 
-v0.1 was run against a Microsoft 365 tenant with device-code sign-in. It produced a CSV with the six columns listed above. The live report is kept local and is not part of this repository.
+The CSV generation lives in `src/Export-M365UserReport.ps1`, so it can be tested without Graph modules or tenant access. Run the offline tests from the repository root:
 
-## Why the report uses `Select-Object`
+```powershell
+Invoke-Pester ./projects/01-m365-user-audit/tests/Export-M365UserReport.Tests.ps1
+```
 
-Graph returns user objects with many properties. `Select-Object` creates a narrow report with predictable columns before `Export-Csv` writes the file. In v0.2, this transformation can become explicit `[pscustomobject]` construction as calculated fields are added.
+The tests cover the six-column schema, enabled and disabled users, commas and quotes in text, Unicode names, and an empty tenant. An empty result creates a header-only CSV. These tests pass with Pester 3.4 and PowerShell 7.6.
+
+v0.1 was previously run against a Microsoft 365 tenant with device-code sign-in. The live report is kept local and is not part of this repository. The refactored Graph call still needs a live tenant check.
+
+## Report format
+
+The exporter builds one explicit PowerShell object per user, keeping the six columns in a stable order. `AccountEnabled` is written as `True` or `False`; blank profile fields remain blank. It does not add tenant-specific data to the repository.
 
 ## Next milestone
 
-v0.2 will make the account status and profile fields easier to interpret, and begin moving the transformation into a reusable function.
+v0.2 can add a readable account-status field and clearer handling of missing profile values.

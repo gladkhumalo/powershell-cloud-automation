@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Extracted Project 01 CSV generation and added offline Pester tests for user status, CSV text, and empty results.
 - Added GitHub Actions to run the offline Pester tests on pushes and pull requests to `main`.
 - Added Pester tests for Project 02 calculations and missing measurements.
 - Added Project 03 v0.1: a Microsoft Graph subscribed SKU capacity CSV.
