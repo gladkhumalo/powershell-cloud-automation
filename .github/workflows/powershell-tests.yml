@@ -29,6 +29,7 @@ jobs:
             './projects/01-m365-user-audit/tests/Export-M365UserReport.Tests.ps1'
             './projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1'
             './projects/03-m365-license-audit/tests/Export-M365LicenseReport.Tests.ps1'
+            './projects/07-network-diagnostics-toolkit/tests/NetworkDiagnostics.Tests.ps1'
           )
           $result = Invoke-Pester -Path $paths -PassThru
           if ($result.FailedCount -gt 0 -or $result.TotalCount -eq 0) { exit 1 }

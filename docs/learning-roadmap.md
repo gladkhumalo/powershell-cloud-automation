@@ -11,3 +11,4 @@
 - [M365 user audit v0.1](../projects/01-m365-user-audit/README.md): Graph user retrieval, CSV export, and offline Pester tests.
 - [Workstation health report v0.1](../projects/02-workstation-health-check/README.md): local CIM report with Pester tests.
 - [M365 license capacity audit v0.1](../projects/03-m365-license-audit/README.md): subscribed SKU CSV with offline Pester tests; live tenant validation is pending.
+- [Network diagnostics toolkit v0.1](../projects/07-network-diagnostics-toolkit/README.md): local name resolution, ICMP, and TCP checks with offline Pester tests.
