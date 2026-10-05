@@ -1,6 +1,6 @@
 # PowerShell Cloud Automation Portfolio
 
-Hands-on PowerShell projects for Windows administration, Microsoft 365 reporting, and network diagnostics. Each project has a focused script, run instructions, and a place for tests and examples. Projects 01–03 and 07 have v0.1 implementations; the remaining projects are planned.
+Hands-on PowerShell projects for Windows administration, Microsoft 365 reporting, and network diagnostics. Each project has a focused script, run instructions, and a place for tests and examples. Projects 01–03 have v0.1 implementations, Project 07 has v0.2, and the remaining projects are planned.
 
 ## Try a project
 
@@ -34,7 +34,7 @@ GitHub Actions runs those tests on pushes and pull requests to `main`. The Graph
 | [04 — M365 Security Assessment](projects/04-m365-security-assessment/README.md) | Security checks | Planned |
 | [05 — Azure Resource Inventory](projects/05-azure-resource-inventory/README.md) | Azure reporting | Planned |
 | [06 — Azure VM Health Check](projects/06-azure-vm-health-check/README.md) | Azure operations | Planned |
-| [07 — Network Diagnostics Toolkit](projects/07-network-diagnostics-toolkit/README.md) | Network troubleshooting | v0.1 |
+| [07 — Network Diagnostics Toolkit](projects/07-network-diagnostics-toolkit/README.md) | Network troubleshooting | v0.2 |
 | [08 — Automation Runbook Project](projects/08-automation-runbook-project/README.md) | Scheduled cloud automation | Planned |
 
 ## Layout

@@ -10,7 +10,9 @@ param (
     [int] $TcpPort = 443,
 
     [ValidateRange(1, 30)]
-    [int] $TimeoutSeconds = 2
+    [int] $TimeoutSeconds = 2,
+
+    [switch] $IncludeLocalContext
 )
 
 begin {
@@ -18,5 +20,5 @@ begin {
 }
 
 process {
-    $Target | Invoke-NetworkDiagnostic -TcpPort $TcpPort -TimeoutSeconds $TimeoutSeconds
+    $Target | Invoke-NetworkDiagnostic -TcpPort $TcpPort -TimeoutSeconds $TimeoutSeconds -IncludeLocalContext:$IncludeLocalContext
 }

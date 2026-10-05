@@ -15,6 +15,7 @@ Describe 'Invoke-NetworkDiagnostic' {
             $result.TestedAddress | Should Be '10.10.10.10'
             $result.IcmpStatus | Should Be 'Failed'
             $result.TcpStatus | Should Be 'Succeeded'
+            $result.LocalContext | Should BeNullOrEmpty
             Assert-MockCalled Resolve-DnsName -Times 0 -Exactly
             Assert-MockCalled Test-DiagnosticTcp -Times 1 -Exactly
         }
@@ -59,6 +60,73 @@ Describe 'Invoke-NetworkDiagnostic' {
             $reports.Count | Should Be 2
             $reports[0].Target | Should Be '10.10.10.10'
             $reports[1].Target | Should Be '10.10.10.11'
+        }
+
+        It 'adds the selected source, route, gateway, and DNS servers when requested' {
+            Mock Test-Connection { [pscustomobject]@{ Status = 'Success'; Latency = 1 } }
+            Mock Test-DiagnosticTcp { [pscustomobject]@{ Status = 'Succeeded'; Error = $null } }
+            Mock Find-NetRoute {
+                [pscustomobject]@{ IPAddress = '10.10.10.5'; InterfaceAlias = 'LabEthernet'; InterfaceIndex = 7 }
+                [pscustomobject]@{ DestinationPrefix = '10.10.20.0/24'; NextHop = '10.10.10.1'; InterfaceIndex = 7 }
+            }
+            Mock Get-NetIPConfiguration {
+                [pscustomobject]@{
+                    IPv4DefaultGateway = [pscustomobject]@{ NextHop = '10.10.10.1' }
+                    IPv6DefaultGateway = $null
+                    DNSServer = [pscustomobject]@{ ServerAddresses = @('10.10.10.53', '10.10.10.54') }
+                }
+            }
+
+            $result = Invoke-NetworkDiagnostic -Target '10.10.20.10' -IncludeLocalContext
+
+            $result.LocalContext.Status | Should Be 'Succeeded'
+            $result.LocalContext.SourceAddress | Should Be '10.10.10.5'
+            $result.LocalContext.InterfaceAlias | Should Be 'LabEthernet'
+            $result.LocalContext.InterfaceIndex | Should Be 7
+            $result.LocalContext.RoutePrefix | Should Be '10.10.20.0/24'
+            $result.LocalContext.NextHop | Should Be '10.10.10.1'
+            $result.LocalContext.DefaultGateway | Should Be '10.10.10.1'
+            $result.LocalContext.DnsServers.Count | Should Be 2
+        }
+
+        It 'keeps probe results when local route access is denied' {
+            Mock Test-Connection { [pscustomobject]@{ Status = 'Success'; Latency = 1 } }
+            Mock Test-DiagnosticTcp { [pscustomobject]@{ Status = 'Succeeded'; Error = $null } }
+            Mock Find-NetRoute { throw 'Access denied' }
+
+            $result = Invoke-NetworkDiagnostic -Target '10.10.20.10' -IncludeLocalContext
+
+            $result.IcmpStatus | Should Be 'Succeeded'
+            $result.TcpStatus | Should Be 'Succeeded'
+            $result.LocalContext.Status | Should Be 'Unavailable'
+            $result.LocalContext.Error | Should Match 'Access denied'
+        }
+
+        It 'keeps selected route details when interface configuration is unavailable' {
+            Mock Test-Connection { [pscustomobject]@{ Status = 'Success'; Latency = 1 } }
+            Mock Test-DiagnosticTcp { [pscustomobject]@{ Status = 'Succeeded'; Error = $null } }
+            Mock Find-NetRoute {
+                [pscustomobject]@{ IPAddress = '10.10.10.5'; InterfaceAlias = 'LabEthernet'; InterfaceIndex = 7 }
+                [pscustomobject]@{ DestinationPrefix = '10.10.20.0/24'; NextHop = '10.10.10.1'; InterfaceIndex = 7 }
+            }
+            Mock Get-NetIPConfiguration { throw 'Access denied' }
+
+            $result = Invoke-NetworkDiagnostic -Target '10.10.20.10' -IncludeLocalContext
+
+            $result.LocalContext.Status | Should Be 'Partial'
+            $result.LocalContext.SourceAddress | Should Be '10.10.10.5'
+            $result.LocalContext.RoutePrefix | Should Be '10.10.20.0/24'
+            $result.LocalContext.DefaultGateway | Should BeNullOrEmpty
+        }
+
+        It 'skips route selection when a hostname cannot resolve' {
+            Mock Resolve-DnsName { throw 'Name does not exist' }
+
+            $result = Invoke-NetworkDiagnostic -Target 'missing.lab.invalid' -IncludeLocalContext
+
+            $result.NameResolutionStatus | Should Be 'Failed'
+            $result.LocalContext.Status | Should Be 'NotRun'
+            $result.LocalContext.SourceAddress | Should BeNullOrEmpty
         }
     }
 

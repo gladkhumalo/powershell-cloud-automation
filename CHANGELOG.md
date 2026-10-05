@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added optional local route, source-interface, gateway, and DNS context to Project 07, plus a three-case troubleshooting lab walkthrough.
 - Added Project 07 v0.1: read-only name resolution, ICMP, and TCP checks with structured results, offline Pester tests, and CI coverage.
 - Extracted Project 01 CSV generation and added offline Pester tests for user status, CSV text, and empty results.
 - Added GitHub Actions to run the offline Pester tests on pushes and pull requests to `main`.
