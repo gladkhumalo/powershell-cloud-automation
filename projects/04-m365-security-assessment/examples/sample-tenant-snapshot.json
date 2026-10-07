@@ -1,0 +1,131 @@
+{
+  "SchemaVersion": 1,
+  "Tool": "M365SecurityAssessment",
+  "ToolVersion": "0.1.0",
+  "TenantId": "8a7b6c5d-0000-4e1f-9a2b-3c4d5e6f7a8b",
+  "CollectedBy": "audit.reader@lab.example.com",
+  "CollectedAtUtc": "2026-10-07T08:30:00.0000000Z",
+  "Sources": {
+    "SecurityDefaults": {
+      "Status": "Collected",
+      "Error": null,
+      "Data": {
+        "id": "00000000-0000-0000-0000-000000000005",
+        "displayName": "Security Defaults",
+        "isEnabled": false
+      }
+    },
+    "ConditionalAccessPolicies": {
+      "Status": "Collected",
+      "Error": null,
+      "Data": [
+        {
+          "id": "c1a00001-0000-4000-8000-000000000001",
+          "displayName": "CA001 - Require MFA for administrators",
+          "state": "enabled",
+          "conditions": {
+            "clientAppTypes": [ "all" ],
+            "applications": { "includeApplications": [ "All" ], "excludeApplications": [] },
+            "users": {
+              "includeUsers": [],
+              "excludeUsers": [ "b9000001-0000-4000-8000-000000000001" ],
+              "includeGroups": [],
+              "excludeGroups": [],
+              "includeRoles": [ "62e90394-69f5-4237-9190-012177145e10", "194ae4cb-b126-40b2-bd5b-6091b380977d" ],
+              "excludeRoles": []
+            }
+          },
+          "grantControls": { "operator": "OR", "builtInControls": [ "mfa" ], "authenticationStrength": null }
+        },
+        {
+          "id": "c1a00002-0000-4000-8000-000000000002",
+          "displayName": "CA002 - Require MFA for all users",
+          "state": "enabledForReportingButNotEnforced",
+          "conditions": {
+            "clientAppTypes": [ "all" ],
+            "applications": { "includeApplications": [ "All" ], "excludeApplications": [] },
+            "users": {
+              "includeUsers": [ "All" ],
+              "excludeUsers": [ "b9000001-0000-4000-8000-000000000001", "b9000002-0000-4000-8000-000000000002" ],
+              "includeGroups": [],
+              "excludeGroups": [],
+              "includeRoles": [],
+              "excludeRoles": []
+            }
+          },
+          "grantControls": { "operator": "OR", "builtInControls": [ "mfa" ], "authenticationStrength": null }
+        },
+        {
+          "id": "c1a00003-0000-4000-8000-000000000003",
+          "displayName": "CA003 - Block legacy authentication",
+          "state": "enabled",
+          "conditions": {
+            "clientAppTypes": [ "exchangeActiveSync", "other" ],
+            "applications": { "includeApplications": [ "All" ], "excludeApplications": [] },
+            "users": {
+              "includeUsers": [ "All" ],
+              "excludeUsers": [ "b9000001-0000-4000-8000-000000000001" ],
+              "includeGroups": [],
+              "excludeGroups": [],
+              "includeRoles": [],
+              "excludeRoles": []
+            }
+          },
+          "grantControls": { "operator": "OR", "builtInControls": [ "block" ], "authenticationStrength": null }
+        }
+      ]
+    },
+    "AuthorizationPolicy": {
+      "Status": "Collected",
+      "Error": null,
+      "Data": {
+        "id": "authorizationPolicy",
+        "displayName": "Authorization Policy",
+        "allowInvitesFrom": "everyone",
+        "allowedToSignUpEmailBasedSubscriptions": true,
+        "allowEmailVerifiedUsersToJoinOrganization": false,
+        "guestUserRoleId": "10dae51f-b6af-4016-8d66-8c2a99b929b3",
+        "defaultUserRolePermissions": {
+          "allowedToCreateApps": false,
+          "allowedToCreateSecurityGroups": true,
+          "allowedToReadOtherUsers": true,
+          "permissionGrantPoliciesAssigned": [
+            "ManagePermissionGrantsForSelf.microsoft-user-default-low",
+            "ManagePermissionGrantsForOwnedResource.microsoft-dynamically-managed-permissions-for-team"
+          ]
+        }
+      }
+    },
+    "GlobalAdministrators": {
+      "Status": "Collected",
+      "Error": null,
+      "Data": [
+        { "@odata.type": "#microsoft.graph.user", "id": "b9000001-0000-4000-8000-000000000001", "displayName": "Emergency Access 01", "userPrincipalName": "breakglass-01@lab.example.com" },
+        { "@odata.type": "#microsoft.graph.user", "id": "b9000002-0000-4000-8000-000000000002", "displayName": "Emergency Access 02", "userPrincipalName": "breakglass-02@lab.example.com" },
+        { "@odata.type": "#microsoft.graph.user", "id": "a1000001-0000-4000-8000-000000000001", "displayName": "Thandi Admin", "userPrincipalName": "thandi.admin@lab.example.com" },
+        { "@odata.type": "#microsoft.graph.user", "id": "a1000002-0000-4000-8000-000000000002", "displayName": "Sipho IT", "userPrincipalName": "sipho.it@lab.example.com" },
+        { "@odata.type": "#microsoft.graph.user", "id": "a1000003-0000-4000-8000-000000000003", "displayName": "Lerato Ops", "userPrincipalName": "lerato.ops@lab.example.com" }
+      ]
+    },
+    "UserRegistrationDetails": {
+      "Status": "Collected",
+      "Error": null,
+      "Data": [
+        { "id": "b9000001-0000-4000-8000-000000000001", "userPrincipalName": "breakglass-01@lab.example.com", "userDisplayName": "Emergency Access 01", "userType": "member", "isAdmin": true, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": true, "methodsRegistered": [ "fido2" ] },
+        { "id": "b9000002-0000-4000-8000-000000000002", "userPrincipalName": "breakglass-02@lab.example.com", "userDisplayName": "Emergency Access 02", "userType": "member", "isAdmin": true, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": true, "methodsRegistered": [ "fido2" ] },
+        { "id": "a1000001-0000-4000-8000-000000000001", "userPrincipalName": "thandi.admin@lab.example.com", "userDisplayName": "Thandi Admin", "userType": "member", "isAdmin": true, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": false, "methodsRegistered": [ "microsoftAuthenticatorPush", "mobilePhone" ] },
+        { "id": "a1000002-0000-4000-8000-000000000002", "userPrincipalName": "sipho.it@lab.example.com", "userDisplayName": "Sipho IT", "userType": "member", "isAdmin": true, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": true, "methodsRegistered": [ "passKeyDeviceBoundAuthenticator", "microsoftAuthenticatorPush" ] },
+        { "id": "a1000003-0000-4000-8000-000000000003", "userPrincipalName": "lerato.ops@lab.example.com", "userDisplayName": "Lerato Ops", "userType": "member", "isAdmin": true, "isMfaRegistered": false, "isMfaCapable": false, "isPasswordlessCapable": false, "methodsRegistered": [] },
+        { "id": "a1000004-0000-4000-8000-000000000004", "userPrincipalName": "helpdesk.lead@lab.example.com", "userDisplayName": "Helpdesk Lead", "userType": "member", "isAdmin": true, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": false, "methodsRegistered": [ "softwareOneTimePasscode" ] },
+        { "id": "c2000001-0000-4000-8000-000000000001", "userPrincipalName": "kagiso.m@lab.example.com", "userDisplayName": "Kagiso M", "userType": "member", "isAdmin": false, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": false, "methodsRegistered": [ "microsoftAuthenticatorPush" ] },
+        { "id": "c2000002-0000-4000-8000-000000000002", "userPrincipalName": "naledi.k@lab.example.com", "userDisplayName": "Naledi K", "userType": "member", "isAdmin": false, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": true, "methodsRegistered": [ "microsoftAuthenticatorPasswordless", "microsoftAuthenticatorPush" ] },
+        { "id": "c2000003-0000-4000-8000-000000000003", "userPrincipalName": "ayanda.n@lab.example.com", "userDisplayName": "Ayanda N", "userType": "member", "isAdmin": false, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": false, "methodsRegistered": [ "mobilePhone" ] },
+        { "id": "c2000004-0000-4000-8000-000000000004", "userPrincipalName": "zanele.d@lab.example.com", "userDisplayName": "Zanele D", "userType": "member", "isAdmin": false, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": false, "methodsRegistered": [ "microsoftAuthenticatorPush" ] },
+        { "id": "c2000005-0000-4000-8000-000000000005", "userPrincipalName": "finance.reports@lab.example.com", "userDisplayName": "Finance Reports", "userType": "member", "isAdmin": false, "isMfaRegistered": true, "isMfaCapable": true, "isPasswordlessCapable": false, "methodsRegistered": [ "softwareOneTimePasscode" ] },
+        { "id": "c2000006-0000-4000-8000-000000000006", "userPrincipalName": "reception@lab.example.com", "userDisplayName": "Reception (shared mailbox)", "userType": "member", "isAdmin": false, "isMfaRegistered": false, "isMfaCapable": false, "isPasswordlessCapable": false, "methodsRegistered": [] },
+        { "id": "d3000001-0000-4000-8000-000000000001", "userPrincipalName": "jordan_vendor.example#EXT#@lab.example.com", "userDisplayName": "Jordan (Vendor)", "userType": "guest", "isAdmin": false, "isMfaRegistered": false, "isMfaCapable": false, "isPasswordlessCapable": false, "methodsRegistered": [] },
+        { "id": "d3000002-0000-4000-8000-000000000002", "userPrincipalName": "sam_partner.example#EXT#@lab.example.com", "userDisplayName": "Sam (Partner)", "userType": "guest", "isAdmin": false, "isMfaRegistered": false, "isMfaCapable": false, "isPasswordlessCapable": false, "methodsRegistered": [] }
+      ]
+    }
+  }
+}
