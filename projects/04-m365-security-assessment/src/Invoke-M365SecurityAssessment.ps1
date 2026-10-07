@@ -5,10 +5,17 @@ Runs a read-only Microsoft 365 security assessment and writes CSV, JSON, and HTM
 .DESCRIPTION
 Live mode signs in to Microsoft Graph with read-only delegated scopes, collects a configuration
 snapshot, evaluates it, and disconnects. Offline mode evaluates a saved snapshot without Graph.
+A configuration file adds emergency-access accounts, thresholds, and accepted risks. A previous
+snapshot adds a "changes since" drift section.
 .EXAMPLE
-./Invoke-M365SecurityAssessment.ps1 -SaveSnapshot
+./Invoke-M365SecurityAssessment.ps1 -SaveSnapshot -ConfigurationPath ../../../config/contoso.json
 .EXAMPLE
-./Invoke-M365SecurityAssessment.ps1 -SnapshotPath ../examples/sample-tenant-snapshot.json
+./Invoke-M365SecurityAssessment.ps1 -SnapshotPath ../examples/sample-tenant-snapshot.json `
+    -CompareToSnapshotPath ../examples/sample-tenant-snapshot-previous.json `
+    -ConfigurationPath ../../../config/m365-security-assessment.example.json
+.EXAMPLE
+./Invoke-M365SecurityAssessment.ps1 -SnapshotPath ./snapshot.json -FailOnSeverity High
+# Exits with code 1 when any High-severity check fails, for scheduled runs and pipelines.
 #>
 [CmdletBinding(DefaultParameterSetName = 'Live')]
 param (
@@ -24,26 +31,46 @@ param (
     [string] $SnapshotPath,
 
     [ValidateNotNullOrEmpty()]
+    [string] $ConfigurationPath,
+
+    [ValidateNotNullOrEmpty()]
+    [string] $CompareToSnapshotPath,
+
+    [ValidateNotNullOrEmpty()]
     [string] $OutputDirectory = (Join-Path $PSScriptRoot '../output'),
 
     [ValidateSet('Csv', 'Html', 'Json')]
     [string[]] $Format = @('Csv', 'Html', 'Json'),
 
-    [ValidateRange(0, 100)] [int] $MinimumGlobalAdmins = 2,
-    [ValidateRange(1, 100)] [int] $MaximumGlobalAdmins = 4,
-    [ValidateRange(0, 100)] [double] $MfaRegistrationTargetPercent = 95,
-    [ValidateRange(0, 100)] [double] $MfaRegistrationMinimumPercent = 80,
+    [ValidateRange(0, 100)] [int] $MinimumGlobalAdmins,
+    [ValidateRange(1, 100)] [int] $MaximumGlobalAdmins,
+    [ValidateRange(0, 100)] [double] $MfaRegistrationTargetPercent,
+    [ValidateRange(0, 100)] [double] $MfaRegistrationMinimumPercent,
+
+    [ValidateSet('High', 'Medium', 'Low')]
+    [string] $FailOnSeverity,
 
     [switch] $PassThru
 )
 
 $ErrorActionPreference = 'Stop'
-$requiredScopes = @('Policy.Read.All', 'RoleManagement.Read.Directory', 'AuditLog.Read.All')
+$requiredScopes = @('Policy.Read.All', 'RoleManagement.Read.Directory', 'AuditLog.Read.All', 'GroupMember.Read.All')
 $connected = $false
+$exitCode = 0
 
 Import-Module (Join-Path $PSScriptRoot 'M365SecurityAssessment.psd1') -Force
 
 try {
+    $configuration = $null
+    if ($ConfigurationPath) {
+        Write-Host "Loading configuration from $ConfigurationPath..."
+        $configuration = Import-M365SecurityConfiguration -Path $ConfigurationPath
+    }
+    $reference = $null
+    if ($CompareToSnapshotPath) {
+        $reference = Import-M365SecuritySnapshot -Path $CompareToSnapshotPath
+    }
+
     if ($PSCmdlet.ParameterSetName -eq 'Offline') {
         Write-Host "Loading snapshot from $SnapshotPath..."
         $snapshot = Import-M365SecuritySnapshot -Path $SnapshotPath
@@ -78,27 +105,54 @@ try {
         $snapshot = Get-M365SecuritySnapshot
     }
 
-    $findingParameters = @{
-        MinimumGlobalAdmins           = $MinimumGlobalAdmins
-        MaximumGlobalAdmins           = $MaximumGlobalAdmins
-        MfaRegistrationTargetPercent  = $MfaRegistrationTargetPercent
-        MfaRegistrationMinimumPercent = $MfaRegistrationMinimumPercent
+    $findingParameters = @{ Configuration = $configuration }
+    foreach ($name in @('MinimumGlobalAdmins', 'MaximumGlobalAdmins', 'MfaRegistrationTargetPercent', 'MfaRegistrationMinimumPercent')) {
+        if ($PSBoundParameters.ContainsKey($name)) {
+            $findingParameters[$name] = $PSBoundParameters[$name]
+        }
     }
     $findings = @($snapshot | Get-M365SecurityFinding @findingParameters)
-    $files = @(Export-M365SecurityReport -Finding $findings -Snapshot $snapshot -OutputDirectory $OutputDirectory -Format $Format)
+
+    $reportParameters = @{ Finding = $findings; Snapshot = $snapshot; OutputDirectory = $OutputDirectory; Format = $Format }
+    $drift = @()
+    if ($reference) {
+        $drift = @(Compare-M365SecuritySnapshot -ReferenceSnapshot $reference -DifferenceSnapshot $snapshot -Configuration $configuration)
+        $reportParameters.Drift = $drift
+        $reportParameters.ReferenceSnapshot = $reference
+    }
+    $files = @(Export-M365SecurityReport @reportParameters)
 
     if ($SaveSnapshot) {
-        $snapshotFile = Join-Path $OutputDirectory ([IO.Path]::GetFileNameWithoutExtension($files[0].Name) -replace '^M365-Security-Assessment', 'M365-Security-Snapshot')
-        $files += Export-M365SecuritySnapshot -Snapshot $snapshot -Path "$snapshotFile.json"
+        $stamp = (Get-Date $snapshot.CollectedAtUtc).ToUniversalTime().ToString('yyyyMMdd-HHmmss', [cultureinfo]::InvariantCulture)
+        $files += Export-M365SecuritySnapshot -Snapshot $snapshot -Path (Join-Path $OutputDirectory "M365-Security-Snapshot-$stamp.json")
     }
 
-    $counts = $findings | Group-Object Status -AsHashTable -AsString
-    $count = { param ($status) if ($counts -and $counts.ContainsKey($status)) { $counts[$status].Count } else { 0 } }
+    $counts = @{}
+    $findings | Group-Object Status | ForEach-Object { $counts[$_.Name] = $_.Count }
+    $count = { param ($status) if ($counts.ContainsKey($status)) { $counts[$status] } else { 0 } }
     Write-Host ''
-    Write-Host "Tenant $($snapshot.TenantId): Fail $(& $count 'Fail') | Warn $(& $count 'Warn') | Not assessed $(& $count 'NotAssessed') | Pass $(& $count 'Pass')"
+    Write-Host "Tenant $($snapshot.TenantId): Fail $(& $count 'Fail') | Warn $(& $count 'Warn') | Not assessed $(& $count 'NotAssessed') | Accepted $(& $count 'Accepted') | Pass $(& $count 'Pass')"
     $findings | Format-Table Status, Severity, CheckId, Title -AutoSize | Out-Host
+
+    if ($reference) {
+        $regressions = @($drift | Where-Object { $_.ChangeType -in @('Regressed', 'NewlyAffected') })
+        Write-Host "Changes since $((Get-Date $reference.CollectedAtUtc).ToUniversalTime().ToString('yyyy-MM-dd', [cultureinfo]::InvariantCulture)): $($drift.Count) total, $($regressions.Count) regression(s)."
+        if ($regressions.Count -gt 0) {
+            $regressions | Format-Table ChangeType, Item, Before, After -AutoSize | Out-Host
+        }
+    }
+
     Write-Host 'Reports (confidential, contain tenant data):'
     $files | ForEach-Object { Write-Host "  $($_.FullName)" }
+
+    if ($FailOnSeverity) {
+        $limit = @{ High = 0; Medium = 1; Low = 2 }[$FailOnSeverity]
+        $blocking = @($findings | Where-Object { $_.Status -eq 'Fail' -and @{ High = 0; Medium = 1; Low = 2 }[$_.Severity] -le $limit })
+        if ($blocking.Count -gt 0) {
+            Write-Warning "$($blocking.Count) failed check(s) at or above $FailOnSeverity severity: $($blocking.CheckId -join ', ')."
+            $exitCode = 1
+        }
+    }
 
     if ($PassThru) {
         $findings
@@ -112,3 +166,5 @@ finally {
         Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
     }
 }
+
+exit $exitCode

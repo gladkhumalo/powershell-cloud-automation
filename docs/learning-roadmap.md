@@ -10,6 +10,6 @@
 
 - [M365 user audit v0.1](../projects/01-m365-user-audit/README.md): Graph user retrieval, CSV export, and offline Pester tests.
 - [Workstation health report v0.1](../projects/02-workstation-health-check/README.md): local CIM report with Pester tests.
-- [M365 security assessment v0.1](../projects/04-m365-security-assessment/README.md): ten read-only Entra ID checks, a collect/evaluate/report module design, offline snapshots, HTML reports, and mocked Graph tests; live tenant validation is pending.
+- [M365 security assessment v0.2](../projects/04-m365-security-assessment/README.md): fourteen read-only Entra ID checks mapped to CISA SCuBA, PIM-aware admin counting, accepted risks with expiry, snapshot drift comparison, a Public/Private module layout, and mocked Graph tests.
 - [M365 license capacity audit v0.1](../projects/03-m365-license-audit/README.md): subscribed SKU CSV with offline Pester tests; live tenant validation is pending.
 - [Network diagnostics toolkit v0.2](../projects/07-network-diagnostics-toolkit/README.md): local name resolution, ICMP, TCP, optional route context, a three-case lab walkthrough, and offline Pester tests.

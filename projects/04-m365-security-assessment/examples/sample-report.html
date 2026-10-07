@@ -6,21 +6,24 @@
 <title>M365 Security Assessment</title>
 <style>
 :root { color-scheme: light dark; --bg:#f5f6f8; --panel:#ffffff; --text:#1c2230; --muted:#5a6375; --border:#dde1e8;
-  --fail:#b42318; --fail-bg:#fde8e7; --warn:#8a5300; --warn-bg:#fff1d0; --na:#475467; --na-bg:#eceff3; --pass:#16794c; --pass-bg:#e2f4e9; --link:#1f5fbf; }
+  --fail:#b42318; --fail-bg:#fde8e7; --warn:#8a5300; --warn-bg:#fff1d0; --na:#475467; --na-bg:#eceff3;
+  --acc:#3a4fb8; --acc-bg:#e6eafc; --pass:#16794c; --pass-bg:#e2f4e9; --link:#1f5fbf; }
 @media (prefers-color-scheme: dark) { :root { --bg:#11141a; --panel:#1a1f28; --text:#e5e8ee; --muted:#9aa3b2; --border:#2c3340;
-  --fail:#ff8b82; --fail-bg:#3b1d1b; --warn:#f3c169; --warn-bg:#352913; --na:#b6bdc9; --na-bg:#262c36; --pass:#71d29d; --pass-bg:#15301f; --link:#82b1ff; } }
+  --fail:#ff8b82; --fail-bg:#3b1d1b; --warn:#f3c169; --warn-bg:#352913; --na:#b6bdc9; --na-bg:#262c36;
+  --acc:#a9b8ff; --acc-bg:#232a4a; --pass:#71d29d; --pass-bg:#15301f; --link:#82b1ff; } }
 * { box-sizing: border-box; }
 body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
 main { max-width:1180px; margin:0 auto; padding:32px 16px 48px; }
 h1 { margin:0 0 4px; font-size:26px; }
-.meta { color:var(--muted); margin:0 0 24px; }
+h2 { margin:36px 0 4px; font-size:20px; }
+.meta { color:var(--muted); margin:0 0 20px; }
 .meta code { font-size:13px; }
-.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:24px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:24px; }
 .card { background:var(--panel); border:1px solid var(--border); border-left-width:5px; border-radius:8px; padding:14px 16px; }
 .card .n { font-size:28px; font-weight:600; line-height:1.1; }
 .card .l { color:var(--muted); }
 .card.fail { border-left-color:var(--fail); } .card.warn { border-left-color:var(--warn); }
-.card.notassessed { border-left-color:var(--na); } .card.pass { border-left-color:var(--pass); }
+.card.notassessed { border-left-color:var(--na); } .card.accepted { border-left-color:var(--acc); } .card.pass { border-left-color:var(--pass); }
 .table-wrap { overflow-x:auto; background:var(--panel); border:1px solid var(--border); border-radius:8px; }
 table { width:100%; border-collapse:collapse; min-width:720px; }
 th, td { text-align:left; vertical-align:top; padding:12px 14px; border-bottom:1px solid var(--border); }
@@ -28,11 +31,13 @@ th { font-size:13px; color:var(--muted); font-weight:600; text-transform:upperca
 tr:last-child td { border-bottom:none; }
 .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:13px; font-weight:600; white-space:nowrap; }
 .badge.fail { color:var(--fail); background:var(--fail-bg); } .badge.warn { color:var(--warn); background:var(--warn-bg); }
-.badge.notassessed { color:var(--na); background:var(--na-bg); } .badge.pass { color:var(--pass); background:var(--pass-bg); }
+.badge.notassessed { color:var(--na); background:var(--na-bg); } .badge.accepted { color:var(--acc); background:var(--acc-bg); }
+.badge.pass { color:var(--pass); background:var(--pass-bg); }
 .sev { font-size:13px; color:var(--muted); }
 .check .id { font-size:12px; color:var(--muted); }
 .check .title { font-weight:600; }
 .check p { margin:4px 0 0; }
+.check p.note { color:var(--acc); font-size:14px; }
 .rec { color:var(--muted); width:36%; }
 a { color:var(--link); }
 details { margin-top:6px; } summary { cursor:pointer; color:var(--link); font-size:14px; }
@@ -44,81 +49,235 @@ footer { margin-top:20px; color:var(--muted); font-size:13px; }
 <body>
 <main>
 <h1>Microsoft 365 security assessment</h1>
-<p class="meta">Tenant <code>8a7b6c5d-0000-4e1f-9a2b-3c4d5e6f7a8b</code> &middot; collected 2026-10-07 08:30 UTC by audit.reader@lab.example.com &middot; tool v0.1.0</p>
+<p class="meta">Tenant <code>8a7b6c5d-0000-4e1f-9a2b-3c4d5e6f7a8b</code> &middot; collected 2026-10-07 08:30 UTC by audit.reader@lab.example.com &middot; tool v0.2.0</p>
 <section class="cards" aria-label="Summary">
   <div class="card fail"><div class="n">3</div><div class="l">Fail</div></div>
-  <div class="card warn"><div class="n">5</div><div class="l">Warn</div></div>
+  <div class="card warn"><div class="n">8</div><div class="l">Warn</div></div>
   <div class="card notassessed"><div class="n">0</div><div class="l">Not assessed</div></div>
+  <div class="card accepted"><div class="n">1</div><div class="l">Accepted risk</div></div>
   <div class="card pass"><div class="n">2</div><div class="l">Pass</div></div>
 </section>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Status</th><th>Severity</th><th>Check and observation</th><th>Recommendation</th></tr></thead>
 <tbody>
-<tr class="status-fail">
+<tr>
   <td><span class="badge fail">Fail</span></td>
   <td><span class="sev">High</span></td>
-  <td class="check"><div class="id">PRIV-001 &middot; Privileged access</div><div class="title">Global Administrator count is within range</div><p>5 user account(s) hold an active Global Administrator assignment; the target range is 2 to 4.</p><details><summary>5 affected</summary><ul><li>breakglass-01@lab.example.com</li><li>breakglass-02@lab.example.com</li><li>thandi.admin@lab.example.com</li><li>sipho.it@lab.example.com</li><li>lerato.ops@lab.example.com</li></ul></details></td>
-  <td class="rec">Keep between two and four Global Administrators, including emergency-access accounts. Move day-to-day administration to least-privileged roles and use Privileged Identity Management for just-in-time elevation. <a href="https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/best-practices" rel="noopener noreferrer">Guidance</a></td>
+  <td class="check"><div class="id">PRIV-001 &middot; Privileged access &middot; CISA MS.AAD.7.1v1</div><div class="title">Global Administrator count is within range</div><p>6 user(s) can hold Global Administrator: 5 with an active assignment, 1 eligible only through PIM, and 0 through role-assignable groups. The target range is 2 to 4.</p><details><summary>6 affected</summary><ul><li>breakglass-01@lab.example.com</li><li>breakglass-02@lab.example.com</li><li>lerato.ops@lab.example.com</li><li>ops.contractor@lab.example.com</li><li>sipho.it@lab.example.com</li><li>thandi.admin@lab.example.com</li></ul></details></td>
+  <td class="rec">Keep between two and four people able to hold Global Administrator (active, eligible, or through a group), including emergency-access accounts. Move day-to-day administration to least-privileged roles. <a href="https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/best-practices" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-fail">
+<tr>
   <td><span class="badge fail">Fail</span></td>
   <td><span class="sev">High</span></td>
   <td class="check"><div class="id">PRIV-002 &middot; Privileged access</div><div class="title">Administrators are registered for MFA</div><p>1 of 6 administrator account(s) have not registered an MFA method.</p><details><summary>1 affected</summary><ul><li>lerato.ops@lab.example.com</li></ul></details></td>
   <td class="rec">Have every administrator register MFA now and enforce MFA for directory roles with Conditional Access. Treat an unregistered administrator as a priority account-takeover risk. <a href="https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/best-practices" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-fail">
+<tr>
   <td><span class="badge fail">Fail</span></td>
   <td><span class="sev">Medium</span></td>
-  <td class="check"><div class="id">COLLAB-001 &middot; External collaboration</div><div class="title">Guest invitations are restricted</div><p>Anyone in the organization, including guests, can invite guest users.</p></td>
+  <td class="check"><div class="id">COLLAB-001 &middot; External collaboration &middot; CISA MS.AAD.8.2v1</div><div class="title">Guest invitations are restricted</div><p>Anyone in the organization, including guests, can invite guest users.</p></td>
   <td class="rec">Limit guest invitations to administrators and the Guest Inviter role, and route other external access through entitlement management or an approval process. <a href="https://learn.microsoft.com/en-us/entra/external-id/external-collaboration-settings-configure" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-warn">
+<tr>
   <td><span class="badge warn">Warn</span></td>
   <td><span class="sev">High</span></td>
-  <td class="check"><div class="id">ID-001 &middot; Identity</div><div class="title">MFA is enforced for all users</div><p>Policy &#39;CA002 - Require MFA for all users&#39; would meet this check but is in report-only mode. Policy &#39;CA001 - Require MFA for administrators&#39; enforces MFA for selected directory roles only; other users can sign in with a password alone.</p></td>
+  <td class="check"><div class="id">ID-001 &middot; Identity &middot; CISA MS.AAD.3.2v2</div><div class="title">MFA is enforced for all users</div><p>Policy &#39;CA002 - Require MFA for all users&#39; would meet this check but is in report-only mode. Policy &#39;CA001 - Require MFA for administrators&#39; enforces MFA for selected directory roles only; other users can sign in with a password alone.</p></td>
   <td class="rec">Enable security defaults, or create a Conditional Access policy that requires MFA (preferably an authentication strength) for all users and all resources. Exclude only documented emergency-access accounts, and switch report-only policies to On after reviewing sign-in impact. <a href="https://learn.microsoft.com/en-us/entra/identity/conditional-access/policy-all-users-mfa-strength" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-warn">
+<tr>
   <td><span class="badge warn">Warn</span></td>
   <td><span class="sev">High</span></td>
-  <td class="check"><div class="id">APP-001 &middot; Applications</div><div class="title">User consent to applications is restricted</div><p>Users can consent to applications within these permission grant policies: microsoft-user-default-low. Confirm consent is limited to verified publishers and low-impact permissions.</p></td>
+  <td class="check"><div class="id">PRIV-005 &middot; Privileged access</div><div class="title">Emergency access is protected from lockout</div><p>Users who are not emergency-access accounts are excluded from enabled policies: &#39;CA003 - Block legacy authentication&#39; (finance.reports@lab.example.com).</p><details><summary>1 affected</summary><ul><li>finance.reports@lab.example.com</li></ul></details></td>
+  <td class="rec">Keep at least two cloud-only emergency-access accounts with permanent Global Administrator, exclude at least one from every Conditional Access policy, protect them with FIDO2 keys, and remove exclusions for anyone else. <a href="https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/security-emergency-access" rel="noopener noreferrer">Guidance</a></td>
+</tr>
+<tr>
+  <td><span class="badge warn">Warn</span></td>
+  <td><span class="sev">High</span></td>
+  <td class="check"><div class="id">APP-001 &middot; Applications &middot; CISA MS.AAD.5.2v1</div><div class="title">User consent to applications is restricted</div><p>Users can consent to applications within these permission grant policies: microsoft-user-default-low. Confirm consent is limited to verified publishers and low-impact permissions.</p></td>
   <td class="rec">Set user consent to &#39;Do not allow user consent&#39;, or allow consent only for verified publishers and low-impact permissions. Enable the admin consent workflow so users can request access. <a href="https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-user-consent" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-warn">
+<tr>
   <td><span class="badge warn">Warn</span></td>
   <td><span class="sev">Medium</span></td>
   <td class="check"><div class="id">ID-003 &middot; Identity</div><div class="title">Members are registered for MFA</div><p>10 of 12 member accounts (83.3%) are registered for MFA. Target 95%, minimum 80%.</p><details><summary>2 affected</summary><ul><li>lerato.ops@lab.example.com</li><li>reception@lab.example.com</li></ul></details></td>
   <td class="rec">Run a registration campaign or a Conditional Access registration policy for unregistered members. Review disabled, shared, and service accounts separately instead of excluding them silently. <a href="https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-mfa-registration-campaign" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-warn">
+<tr>
   <td><span class="badge warn">Warn</span></td>
   <td><span class="sev">Medium</span></td>
-  <td class="check"><div class="id">PRIV-003 &middot; Privileged access</div><div class="title">Administrators have phishing-resistant methods</div><p>3 of 6 administrator account(s) have no FIDO2 key, passkey, or Windows Hello for Business method registered.</p><details><summary>3 affected</summary><ul><li>thandi.admin@lab.example.com</li><li>lerato.ops@lab.example.com</li><li>helpdesk.lead@lab.example.com</li></ul></details></td>
+  <td class="check"><div class="id">ID-004 &middot; Identity &middot; CISA MS.AAD.3.5v2, CISA MS.AAD.3.4v1</div><div class="title">Weak authentication methods are disabled</div><p>Enabled in the authentication methods policy: SMS, email one-time passcode.</p><p class="note">Accepted risk expired on 2026-09-30 (owner it.manager@lab.example.com); renew it or fix the finding.</p><details><summary>2 affected</summary><ul><li>Sms</li><li>Email</li></ul></details></td>
+  <td class="rec">Disable SMS, voice call, and email one-time passcode in the authentication methods policy once users have Microsoft Authenticator, passkeys, or FIDO2 keys, and complete the authentication methods migration. <a href="https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-methods-manage" rel="noopener noreferrer">Guidance</a></td>
+</tr>
+<tr>
+  <td><span class="badge warn">Warn</span></td>
+  <td><span class="sev">Medium</span></td>
+  <td class="check"><div class="id">PRIV-003 &middot; Privileged access &middot; CISA MS.AAD.3.6v1</div><div class="title">Administrators have phishing-resistant methods</div><p>3 of 6 administrator account(s) have no FIDO2 key, passkey, or Windows Hello for Business method registered.</p><p class="note">Accepted risk (owner security.lead@lab.example.com, until 2026-12-31) covers 1 of 3 affected object(s); not covered: thandi.admin@lab.example.com, lerato.ops@lab.example.com.</p><details><summary>3 affected</summary><ul><li>thandi.admin@lab.example.com</li><li>lerato.ops@lab.example.com</li><li>helpdesk.lead@lab.example.com</li></ul></details></td>
   <td class="rec">Register FIDO2 security keys, passkeys, or Windows Hello for Business for administrators, then require a phishing-resistant authentication strength for admin roles. <a href="https://learn.microsoft.com/en-us/entra/identity/conditional-access/policy-admin-phish-resistant-mfa" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-warn">
+<tr>
+  <td><span class="badge warn">Warn</span></td>
+  <td><span class="sev">Medium</span></td>
+  <td class="check"><div class="id">PRIV-004 &middot; Privileged access &middot; CISA MS.AAD.7.4v1</div><div class="title">Global Administrator access is just-in-time</div><p>2 account(s) hold permanent (standing) Global Administrator access outside PIM activation. 2 eligible assignment(s) exist.</p><details><summary>2 affected</summary><ul><li>thandi.admin@lab.example.com</li><li>lerato.ops@lab.example.com</li></ul></details></td>
+  <td class="rec">Convert permanent Global Administrator assignments to eligible assignments in Privileged Identity Management, with MFA and approval on activation. Keep permanent assignments only for emergency-access accounts. <a href="https://learn.microsoft.com/en-us/entra/id-governance/privileged-identity-management/pim-configure" rel="noopener noreferrer">Guidance</a></td>
+</tr>
+<tr>
   <td><span class="badge warn">Warn</span></td>
   <td><span class="sev">Low</span></td>
-  <td class="check"><div class="id">COLLAB-002 &middot; External collaboration</div><div class="title">Guest directory access is restricted</div><p>Guest users have limited access to directory objects (the Microsoft default).</p></td>
+  <td class="check"><div class="id">ID-005 &middot; Identity</div><div class="title">Self-service password reset is enabled and registered</div><p>5 of 6 SSPR-enabled member accounts (83.3%) are registered for self-service password reset. Target 95%, minimum 80%.</p><details><summary>1 affected</summary><ul><li>reception@lab.example.com</li></ul></details></td>
+  <td class="rec">Enable self-service password reset for all users and use combined registration so people register MFA and SSPR methods together. Unregistered users depend on the helpdesk, which is a social-engineering target. <a href="https://learn.microsoft.com/en-us/entra/identity/authentication/tutorial-enable-sspr" rel="noopener noreferrer">Guidance</a></td>
+</tr>
+<tr>
+  <td><span class="badge accepted">Accepted</span></td>
+  <td><span class="sev">Low</span></td>
+  <td class="check"><div class="id">COLLAB-002 &middot; External collaboration &middot; CISA MS.AAD.8.1v1</div><div class="title">Guest directory access is restricted</div><p>Guest users have limited access to directory objects (the Microsoft default).</p><p class="note">Risk accepted by it.manager@lab.example.com until 2027-03-31, CHG-1042: The partner portal needs guests to look up project team members in the directory.</p></td>
   <td class="rec">Restrict guest access to the properties and memberships of their own directory objects unless a documented business need requires broader visibility. <a href="https://learn.microsoft.com/en-us/entra/identity/users/users-restrict-guest-permissions" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-pass">
+<tr>
   <td><span class="badge pass">Pass</span></td>
   <td><span class="sev">High</span></td>
-  <td class="check"><div class="id">ID-002 &middot; Identity</div><div class="title">Legacy authentication is blocked</div><p>Enabled Conditional Access policy &#39;CA003 - Block legacy authentication&#39; blocks Exchange ActiveSync and other legacy clients for all users (1 excluded user).</p></td>
+  <td class="check"><div class="id">ID-002 &middot; Identity &middot; CISA MS.AAD.1.1v1</div><div class="title">Legacy authentication is blocked</div><p>Enabled Conditional Access policy &#39;CA003 - Block legacy authentication&#39; blocks Exchange ActiveSync and other legacy clients for all users (2 excluded users).</p></td>
   <td class="rec">Block legacy authentication for all users with Conditional Access (client apps: Exchange ActiveSync clients and Other clients), or enable security defaults. Review sign-in logs for legacy clients before enforcing. <a href="https://learn.microsoft.com/en-us/entra/identity/conditional-access/policy-block-legacy-authentication" rel="noopener noreferrer">Guidance</a></td>
 </tr>
-<tr class="status-pass">
+<tr>
   <td><span class="badge pass">Pass</span></td>
   <td><span class="sev">Medium</span></td>
-  <td class="check"><div class="id">APP-002 &middot; Applications</div><div class="title">Users cannot register applications</div><p>&#39;Users can register applications&#39; is set to No.</p></td>
+  <td class="check"><div class="id">APP-002 &middot; Applications &middot; CISA MS.AAD.5.1v1</div><div class="title">Users cannot register applications</div><p>&#39;Users can register applications&#39; is set to No.</p></td>
   <td class="rec">Set &#39;Users can register applications&#39; to No and assign the Application Developer role to people who need it. <a href="https://learn.microsoft.com/en-us/entra/fundamentals/users-default-permissions" rel="noopener noreferrer">Guidance</a></td>
 </tr>
 </tbody>
 </table>
 </div>
-<footer>Read-only configuration review. Findings describe configuration at collection time and do not replace a full security review. This report contains tenant and account details; store and share it as confidential.</footer>
+<h2>Changes since 2026-09-07 08:30 UTC</h2>
+<p class="meta">5 regressed &middot; 1 improved &middot; 7 configuration change(s)</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Change</th><th>Area</th><th>Item and detail</th><th>Before &rarr; after</th></tr></thead>
+<tbody>
+<tr>
+  <td><span class="badge fail">Regressed</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">COLLAB-001 Guest invitations are restricted</div><p>Anyone in the organization, including guests, can invite guest users.</p></td>
+  <td class="rec">Pass &rarr; Fail</td>
+</tr>
+<tr>
+  <td><span class="badge fail">Regressed</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">ID-001 MFA is enforced for all users</div><p>Policy &#39;CA002 - Require MFA for all users&#39; would meet this check but is in report-only mode. Policy &#39;CA001 - Require MFA for administrators&#39; enforces MFA for selected directory roles only; other users can sign in with a password alone.</p></td>
+  <td class="rec">Pass &rarr; Warn</td>
+</tr>
+<tr>
+  <td><span class="badge fail">Regressed</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-001 Global Administrator count is within range</div><p>6 user(s) can hold Global Administrator: 5 with an active assignment, 1 eligible only through PIM, and 0 through role-assignable groups. The target range is 2 to 4.</p></td>
+  <td class="rec">Pass &rarr; Fail</td>
+</tr>
+<tr>
+  <td><span class="badge fail">Regressed</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-002 Administrators are registered for MFA</div><p>1 of 6 administrator account(s) have not registered an MFA method.</p></td>
+  <td class="rec">Pass &rarr; Fail</td>
+</tr>
+<tr>
+  <td><span class="badge fail">Regressed</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-005 Emergency access is protected from lockout</div><p>Users who are not emergency-access accounts are excluded from enabled policies: &#39;CA003 - Block legacy authentication&#39; (finance.reports@lab.example.com).</p></td>
+  <td class="rec">Pass &rarr; Warn</td>
+</tr>
+<tr>
+  <td><span class="badge warn">Newly affected</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">ID-003 Members are registered for MFA</div><p>lerato.ops@lab.example.com</p></td>
+  <td class="rec">1 &rarr; 2</td>
+</tr>
+<tr>
+  <td><span class="badge warn">Newly affected</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-001 Global Administrator count is within range</div><p>breakglass-01@lab.example.com, breakglass-02@lab.example.com, lerato.ops@lab.example.com, ops.contractor@lab.example.com, sipho.it@lab.example.com, thandi.admin@lab.example.com</p></td>
+  <td class="rec">0 &rarr; 6</td>
+</tr>
+<tr>
+  <td><span class="badge warn">Newly affected</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-002 Administrators are registered for MFA</div><p>lerato.ops@lab.example.com</p></td>
+  <td class="rec">0 &rarr; 1</td>
+</tr>
+<tr>
+  <td><span class="badge warn">Newly affected</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-003 Administrators have phishing-resistant methods</div><p>lerato.ops@lab.example.com</p></td>
+  <td class="rec">2 &rarr; 3</td>
+</tr>
+<tr>
+  <td><span class="badge warn">Newly affected</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-004 Global Administrator access is just-in-time</div><p>lerato.ops@lab.example.com</p></td>
+  <td class="rec">1 &rarr; 2</td>
+</tr>
+<tr>
+  <td><span class="badge warn">Newly affected</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">PRIV-005 Emergency access is protected from lockout</div><p>finance.reports@lab.example.com</p></td>
+  <td class="rec">0 &rarr; 1</td>
+</tr>
+<tr>
+  <td><span class="badge pass">No longer affected</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">ID-004 Weak authentication methods are disabled</div><p>Voice</p></td>
+  <td class="rec">3 &rarr; 2</td>
+</tr>
+<tr>
+  <td><span class="badge pass">Improved</span></td>
+  <td class="sev">Finding</td>
+  <td class="check"><div class="title">APP-002 Users cannot register applications</div><p>&#39;Users can register applications&#39; is set to No.</p></td>
+  <td class="rec">Warn &rarr; Pass</td>
+</tr>
+<tr>
+  <td><span class="badge notassessed">Added</span></td>
+  <td class="sev">Global Administrators</td>
+  <td class="check"><div class="title">lerato.ops@lab.example.com</div><p>Active assignment</p></td>
+  <td class="rec"></td>
+</tr>
+<tr>
+  <td><span class="badge notassessed">Added</span></td>
+  <td class="sev">Global Administrators</td>
+  <td class="check"><div class="title">ops.contractor@lab.example.com</div><p>Eligible assignment (PIM)</p></td>
+  <td class="rec"></td>
+</tr>
+<tr>
+  <td><span class="badge notassessed">Modified</span></td>
+  <td class="sev">Authentication methods</td>
+  <td class="check"><div class="title">Voice</div><p></p></td>
+  <td class="rec">enabled &rarr; disabled</td>
+</tr>
+<tr>
+  <td><span class="badge notassessed">Modified</span></td>
+  <td class="sev">Authorization policy</td>
+  <td class="check"><div class="title">allowInvitesFrom</div><p></p></td>
+  <td class="rec">adminsAndGuestInviters &rarr; everyone</td>
+</tr>
+<tr>
+  <td><span class="badge notassessed">Modified</span></td>
+  <td class="sev">Authorization policy</td>
+  <td class="check"><div class="title">defaultUserRolePermissions.allowedToCreateApps</div><p></p></td>
+  <td class="rec">True &rarr; False</td>
+</tr>
+<tr>
+  <td><span class="badge notassessed">Modified</span></td>
+  <td class="sev">Conditional Access</td>
+  <td class="check"><div class="title">CA002 - Require MFA for all users</div><p>Policy state changed.</p></td>
+  <td class="rec">enabled &rarr; enabledForReportingButNotEnforced</td>
+</tr>
+<tr>
+  <td><span class="badge notassessed">Modified</span></td>
+  <td class="sev">Conditional Access</td>
+  <td class="check"><div class="title">CA003 - Block legacy authentication</div><p>excludeUsers: added finance.reports@lab.example.com.</p></td>
+  <td class="rec"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<footer>Read-only configuration review. Findings describe configuration at collection time and do not replace a full security review. Baseline IDs refer to the CISA SCuBA Microsoft Entra ID baseline. This report contains tenant and account details; store and share it as confidential.</footer>
 </main>
 </body>
 </html>
