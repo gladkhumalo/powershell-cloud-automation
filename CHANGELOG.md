@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added Project 04 v0.1: a read-only Microsoft 365 security assessment with ten Entra ID checks (MFA enforcement, legacy authentication, MFA registration, Global Administrator count, admin MFA and phishing-resistant methods, user consent, app registration, and guest access), offline snapshot mode with a fictional sample tenant, CSV/JSON/HTML reports, and 30 offline Pester tests in CI.
 - Added optional local route, source-interface, gateway, and DNS context to Project 07, plus a three-case troubleshooting lab walkthrough.
 - Added Project 07 v0.1: read-only name resolution, ICMP, and TCP checks with structured results, offline Pester tests, and CI coverage.
 - Extracted Project 01 CSV generation and added offline Pester tests for user status, CSV text, and empty results.
