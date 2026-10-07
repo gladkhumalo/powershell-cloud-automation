@@ -1,0 +1,39 @@
+{
+  "SchemaVersion": 1,
+  "TenantId": "8a7b6c5d-0000-4e1f-9a2b-3c4d5e6f7a8b",
+  "EmergencyAccessAccounts": [
+    "breakglass-01@lab.example.com",
+    "breakglass-02@lab.example.com"
+  ],
+  "Thresholds": {
+    "MinimumGlobalAdmins": 2,
+    "MaximumGlobalAdmins": 4,
+    "MfaRegistrationTargetPercent": 95,
+    "MfaRegistrationMinimumPercent": 80
+  },
+  "AcceptedRisks": [
+    {
+      "CheckId": "COLLAB-002",
+      "Reason": "The partner portal needs guests to look up project team members in the directory.",
+      "Owner": "it.manager@lab.example.com",
+      "Expires": "2027-03-31",
+      "Ticket": "CHG-1042"
+    },
+    {
+      "CheckId": "PRIV-003",
+      "AffectedObjects": [ "helpdesk.lead@lab.example.com" ],
+      "Reason": "FIDO2 key ordered; the helpdesk lead uses an OATH token until it arrives.",
+      "Owner": "security.lead@lab.example.com",
+      "Expires": "2026-12-31",
+      "Ticket": "RISK-21"
+    },
+    {
+      "CheckId": "ID-004",
+      "AffectedObjects": [ "Email" ],
+      "Reason": "Email one-time passcode is kept for guest sign-in until the B2B MFA rollout.",
+      "Owner": "it.manager@lab.example.com",
+      "Expires": "2026-09-30",
+      "Ticket": "RISK-17"
+    }
+  ]
+}

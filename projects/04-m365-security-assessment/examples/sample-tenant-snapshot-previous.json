@@ -4,7 +4,7 @@
   "ToolVersion": "0.2.0",
   "TenantId": "8a7b6c5d-0000-4e1f-9a2b-3c4d5e6f7a8b",
   "CollectedBy": "audit.reader@lab.example.com",
-  "CollectedAtUtc": "2026-10-07T08:30:00.0000000Z",
+  "CollectedAtUtc": "2026-09-07T08:30:00.0000000Z",
   "Sources": {
     "SecurityDefaults": {
       "Status": "Collected",
@@ -58,7 +58,7 @@
         {
           "id": "c1a00002-0000-4000-8000-000000000002",
           "displayName": "CA002 - Require MFA for all users",
-          "state": "enabledForReportingButNotEnforced",
+          "state": "enabled",
           "conditions": {
             "clientAppTypes": [
               "all"
@@ -111,8 +111,7 @@
                 "All"
               ],
               "excludeUsers": [
-                "b9000001-0000-4000-8000-000000000001",
-                "c2000005-0000-4000-8000-000000000005"
+                "b9000001-0000-4000-8000-000000000001"
               ],
               "includeGroups": [],
               "excludeGroups": [],
@@ -136,12 +135,12 @@
       "Data": {
         "id": "authorizationPolicy",
         "displayName": "Authorization Policy",
-        "allowInvitesFrom": "everyone",
+        "allowInvitesFrom": "adminsAndGuestInviters",
         "allowedToSignUpEmailBasedSubscriptions": true,
         "allowEmailVerifiedUsersToJoinOrganization": false,
         "guestUserRoleId": "10dae51f-b6af-4016-8d66-8c2a99b929b3",
         "defaultUserRolePermissions": {
-          "allowedToCreateApps": false,
+          "allowedToCreateApps": true,
           "allowedToCreateSecurityGroups": true,
           "allowedToReadOtherUsers": true,
           "permissionGrantPoliciesAssigned": [
@@ -202,7 +201,7 @@
           {
             "@odata.type": "#microsoft.graph.voiceAuthenticationMethodConfiguration",
             "id": "Voice",
-            "state": "disabled",
+            "state": "enabled",
             "excludeTargets": [],
             "includeTargets": [
               {
@@ -268,12 +267,6 @@
           "id": "a1000002-0000-4000-8000-000000000002",
           "displayName": "Sipho IT",
           "userPrincipalName": "sipho.it@lab.example.com"
-        },
-        {
-          "@odata.type": "#microsoft.graph.user",
-          "id": "a1000003-0000-4000-8000-000000000003",
-          "displayName": "Lerato Ops",
-          "userPrincipalName": "lerato.ops@lab.example.com"
         }
       ]
     },
@@ -330,22 +323,6 @@
           }
         },
         {
-          "id": "a1000003-0000-4000-8000-000000000003-ga",
-          "principalId": "a1000003-0000-4000-8000-000000000003",
-          "roleDefinitionId": "62e90394-69f5-4237-9190-012177145e10",
-          "directoryScopeId": "/",
-          "startDateTime": "2026-01-15T09:00:00Z",
-          "endDateTime": null,
-          "memberType": "Direct",
-          "assignmentType": "Assigned",
-          "principal": {
-            "@odata.type": "#microsoft.graph.user",
-            "id": "a1000003-0000-4000-8000-000000000003",
-            "displayName": "Lerato Ops",
-            "userPrincipalName": "lerato.ops@lab.example.com"
-          }
-        },
-        {
           "id": "a1000002-0000-4000-8000-000000000002-ga",
           "principalId": "a1000002-0000-4000-8000-000000000002",
           "roleDefinitionId": "62e90394-69f5-4237-9190-012177145e10",
@@ -380,21 +357,6 @@
             "id": "a1000002-0000-4000-8000-000000000002",
             "displayName": "Sipho IT",
             "userPrincipalName": "sipho.it@lab.example.com"
-          }
-        },
-        {
-          "id": "e5000001-0000-4000-8000-000000000001-ga",
-          "principalId": "e5000001-0000-4000-8000-000000000001",
-          "roleDefinitionId": "62e90394-69f5-4237-9190-012177145e10",
-          "directoryScopeId": "/",
-          "startDateTime": "2026-01-15T09:00:00Z",
-          "endDateTime": "2026-12-31T00:00:00Z",
-          "memberType": "Direct",
-          "principal": {
-            "@odata.type": "#microsoft.graph.user",
-            "id": "e5000001-0000-4000-8000-000000000001",
-            "displayName": "Ops Contractor",
-            "userPrincipalName": "ops.contractor@lab.example.com"
           }
         }
       ]
@@ -469,19 +431,6 @@
           ],
           "isSsprEnabled": true,
           "isSsprRegistered": true
-        },
-        {
-          "id": "a1000003-0000-4000-8000-000000000003",
-          "userPrincipalName": "lerato.ops@lab.example.com",
-          "userDisplayName": "Lerato Ops",
-          "userType": "member",
-          "isAdmin": true,
-          "isMfaRegistered": false,
-          "isMfaCapable": false,
-          "isPasswordlessCapable": false,
-          "methodsRegistered": [],
-          "isSsprEnabled": true,
-          "isSsprRegistered": false
         },
         {
           "id": "a1000004-0000-4000-8000-000000000004",
