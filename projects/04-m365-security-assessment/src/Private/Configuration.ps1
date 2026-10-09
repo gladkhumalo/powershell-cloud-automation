@@ -38,6 +38,7 @@ function ConvertTo-SecurityConfiguration {
             SchemaVersion           = $script:ConfigurationSchemaVersion
             TenantId                = $null
             EmergencyAccessAccounts = [string[]] @()
+            EmergencyAccessStated   = $false
             Thresholds              = [pscustomobject]@{}
             AcceptedRisks           = @()
         }
@@ -99,6 +100,7 @@ function ConvertTo-SecurityConfiguration {
         SchemaVersion           = $script:ConfigurationSchemaVersion
         TenantId                = if ($tenantId) { $tenantId } else { $null }
         EmergencyAccessAccounts = $emergency
+        EmergencyAccessStated   = (Test-PropertyPresent -InputObject $InputObject -Name 'EmergencyAccessAccounts') -or [bool] (Get-PropertyValue $InputObject 'EmergencyAccessStated')
         Thresholds              = [pscustomobject] $thresholds
         AcceptedRisks           = $risks.ToArray()
     }

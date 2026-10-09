@@ -150,15 +150,20 @@ function New-TestConfiguration {
         [string[]] $Emergency = @('admin1@lab.example', 'admin2@lab.example'),
         [object[]] $AcceptedRisks = @(),
         [hashtable] $Thresholds = @{},
-        [string] $TenantId
+        [string] $TenantId,
+        [switch] $NoEmergencyList
     )
-    [pscustomobject]@{
+    $configuration = [pscustomobject]@{
         SchemaVersion           = 1
         TenantId                = $TenantId
         EmergencyAccessAccounts = $Emergency
         Thresholds              = [pscustomobject] $Thresholds
         AcceptedRisks           = $AcceptedRisks
     }
+    if ($NoEmergencyList) {
+        $configuration.PSObject.Properties.Remove('EmergencyAccessAccounts')
+    }
+    $configuration
 }
 
 function New-TestRisk {
@@ -492,16 +497,31 @@ Describe 'Privileged access checks' {
 
         (Get-TestFinding $snapshot 'PRIV-004').AffectedObjects | Should Be 'tier0@lab.example'
 
-        $finding = Get-TestFinding $snapshot 'PRIV-004' @{ Configuration = (New-TestConfiguration -Emergency @()) }
+        $finding = Get-TestFinding $snapshot 'PRIV-004' @{ Configuration = (New-TestConfiguration -NoEmergencyList) }
         $finding.AffectedCount | Should Be 3
         $finding.Observed | Should Match 'No emergency-access accounts are configured'
+
+        $finding = Get-TestFinding $snapshot 'PRIV-004' @{ Configuration = (New-TestConfiguration -Emergency @()) }
+        $finding.Observed | Should Match 'The tenant has no emergency-access accounts to exclude'
     }
 
-    It 'reports NotAssessed for PRIV-005 when no emergency-access accounts are configured' {
-        $finding = Get-TestFinding (New-TestSnapshot) 'PRIV-005' @{ Configuration = (New-TestConfiguration -Emergency @()) }
-
+    It 'reports NotAssessed for PRIV-005 when emergency-access accounts are not configured' {
+        $finding = Get-TestFinding (New-TestSnapshot) 'PRIV-005' @{ Configuration = (New-TestConfiguration -NoEmergencyList) }
         $finding.Status | Should Be 'NotAssessed'
         $finding.Observed | Should Match 'EmergencyAccessAccounts'
+
+        (Get-TestFinding (New-TestSnapshot) 'PRIV-005' @{ Configuration = $null }).Status | Should Be 'NotAssessed'
+    }
+
+    It 'fails PRIV-005 when the configuration states the tenant has no emergency-access accounts' {
+        $path = Join-Path $TestDrive 'no-breakglass.json'
+        '{ "SchemaVersion": 1, "EmergencyAccessAccounts": [] }' | Set-Content -LiteralPath $path
+        $configuration = Import-M365SecurityConfiguration -Path $path
+
+        $finding = Get-TestFinding (New-TestSnapshot) 'PRIV-005' @{ Configuration = $configuration }
+
+        $finding.Status | Should Be 'Fail'
+        $finding.Observed | Should Match 'no emergency-access accounts'
     }
 
     It 'fails PRIV-005 when an emergency-access account does not hold Global Administrator' {

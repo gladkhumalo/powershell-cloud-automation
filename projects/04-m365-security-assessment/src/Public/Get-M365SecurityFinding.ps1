@@ -43,6 +43,7 @@ function Get-M365SecurityFinding {
         $context = [pscustomobject]@{
             Thresholds              = $thresholds
             EmergencyAccessAccounts = @($config.EmergencyAccessAccounts)
+            EmergencyAccessStated   = $config.EmergencyAccessStated
             IdentityMap             = Get-DirectoryIdentityMap -Snapshot $Snapshot
         }
 

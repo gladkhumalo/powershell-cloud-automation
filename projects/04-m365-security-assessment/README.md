@@ -81,7 +81,7 @@ Each tenant can have a configuration file. Start by copying [`config/m365-securi
 ```
 
 - **TenantId** (optional) stops the file from being applied to the wrong tenant's snapshot.
-- **EmergencyAccessAccounts** enables PRIV-005 and excludes these accounts from PRIV-004. Without it, PRIV-005 reports NotAssessed.
+- **EmergencyAccessAccounts** enables PRIV-005 and excludes these accounts from PRIV-004. If the property is missing, PRIV-005 reports NotAssessed. An explicit empty list (`[]`) states that the tenant has none, and PRIV-005 fails.
 - **Thresholds** override the defaults. Command-line parameters override the file.
 - **AcceptedRisks** require a `CheckId`, `Reason`, `Owner`, and `Expires` date (`yyyy-MM-dd`). How a risk applies:
   - **Without `AffectedObjects`**, it covers the whole check.

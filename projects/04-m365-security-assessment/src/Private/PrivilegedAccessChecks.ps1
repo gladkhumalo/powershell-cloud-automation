@@ -270,7 +270,7 @@ function Test-StandingGlobalAdministrator {
 
     $observed = "$($nonEmergency.Count) account(s) hold permanent (standing) Global Administrator access outside PIM activation. $eligibilityNote"
     if ($emergency.Count -eq 0) {
-        $observed += ' No emergency-access accounts are configured, so none were excluded from this count.'
+        $observed += if ($Context.EmergencyAccessStated) { ' The tenant has no emergency-access accounts to exclude.' } else { ' No emergency-access accounts are configured, so none were excluded from this count.' }
     }
     New-SecurityFinding -CheckId $checkId -Status Warn -Observed $observed -AffectedObjects $nonEmergency
 }
@@ -284,7 +284,10 @@ function Test-EmergencyAccess {
     $checkId = 'PRIV-005'
     $emergency = @($Context.EmergencyAccessAccounts)
     if ($emergency.Count -eq 0) {
-        return New-SecurityFinding -CheckId $checkId -Status NotAssessed -Observed 'No emergency-access accounts are listed in the assessment configuration (EmergencyAccessAccounts), so lockout protection could not be checked.'
+        if ($Context.EmergencyAccessStated) {
+            return New-SecurityFinding -CheckId $checkId -Status Fail -Observed 'The assessment configuration states that the tenant has no emergency-access accounts. If Conditional Access, MFA, or federation fails, or the only administrators are unavailable, nobody can recover administrative access.'
+        }
+        return New-SecurityFinding -CheckId $checkId -Status NotAssessed -Observed 'No emergency-access accounts are listed in the assessment configuration (EmergencyAccessAccounts), so lockout protection could not be checked. List them, or set EmergencyAccessAccounts to an empty list if the tenant has none.'
     }
 
     $globalAdmins = Get-SnapshotSource -Snapshot $Snapshot -Name 'GlobalAdministrators'
