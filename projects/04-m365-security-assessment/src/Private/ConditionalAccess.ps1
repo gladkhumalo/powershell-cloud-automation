@@ -85,6 +85,7 @@ function Resolve-PolicyBaselineCheck {
     }
 
     $notes = [System.Collections.Generic.List[string]]::new()
+    $turnedOff = [System.Collections.Generic.List[string]]::new()
     if (Test-SourceCollected $conditionalAccess) {
         $policies = @(Get-SourceItem -Source $conditionalAccess)
         $matching = @($policies | Where-Object { & $Predicate $_ })
@@ -95,6 +96,10 @@ function Resolve-PolicyBaselineCheck {
             $policy = $enabled[0]
             $observed = Format-Invariant $PolicyObservation @((Format-PolicyName $policy), (Format-PolicyExclusion $policy))
             return New-SecurityFinding -CheckId $CheckId -Status Pass -Observed $observed
+        }
+        # A matching policy that is switched off doesn't change the status, but it is the quickest fix.
+        foreach ($policy in @($matching | Where-Object { (Get-PropertyValue $_ 'state') -eq 'disabled' })) {
+            $turnedOff.Add("Policy $(Format-PolicyName $policy) would meet this check but is turned off.")
         }
         foreach ($policy in $reportOnly) {
             $notes.Add("Policy $(Format-PolicyName $policy) would meet this check but is in report-only mode.")
@@ -108,11 +113,11 @@ function Resolve-PolicyBaselineCheck {
 
     $failed = @($defaults, $conditionalAccess | Where-Object { -not (Test-SourceCollected $_) })
     if ($failed.Count -gt 0) {
-        $observed = (@(Format-SourceError -Source $failed) + $notes) -join ' '
+        $observed = (@(Format-SourceError -Source $failed) + $notes + $turnedOff) -join ' '
         return New-SecurityFinding -CheckId $CheckId -Status NotAssessed -Observed $observed
     }
     if ($notes.Count -gt 0) {
-        return New-SecurityFinding -CheckId $CheckId -Status Warn -Observed ($notes -join ' ')
+        return New-SecurityFinding -CheckId $CheckId -Status Warn -Observed ((@($notes) + $turnedOff) -join ' ')
     }
-    New-SecurityFinding -CheckId $CheckId -Status Fail -Observed $FailObservation
+    New-SecurityFinding -CheckId $CheckId -Status Fail -Observed ((@($FailObservation) + $turnedOff) -join ' ')
 }

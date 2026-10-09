@@ -219,7 +219,13 @@ Import-Module Pester -RequiredVersion 3.4.0
 Invoke-Pester ./projects/04-m365-security-assessment/tests/M365SecurityAssessment.Tests.ps1
 ```
 
-All 77 repository tests pass with PowerShell 7.6.6 and Pester 3.4.0, and GitHub Actions runs them on pull requests and pushes to `main`. PSScriptAnalyzer reports no findings apart from deliberate `Write-Host` console progress and in-memory `New-*` helpers. A live tenant run is the next validation step; record its outcome here.
+All 77 repository tests pass with PowerShell 7.6.6 and Pester 3.4.0, and GitHub Actions runs them on pull requests and pushes to `main`. PSScriptAnalyzer reports no findings apart from deliberate `Write-Host` console progress and in-memory `New-*` helpers. **Live tenant run (test tenant, 2026-10-09):**
+
+- Sign-in, consent, and collection worked, and 12 of 14 checks were assessed. The findings matched the tenant's configuration.
+- Two problems found and fixed:
+  - Both PIM endpoints returned 400 Bad Request, even without `$expand`. Collection now reads the schedule instances without a server-side `$filter` and filters for Global Administrator locally. Failed sources now record Graph's error code and message from the response body, not just the status line.
+  - The tenant's "Block legacy authentication" policy was switched off. The baseline checks now name matching policies that are turned off, because enabling them is the quickest fix.
+- Re-running to confirm the PIM fix is pending.
 
 ## Next improvements
 

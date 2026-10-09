@@ -10,9 +10,35 @@ function Invoke-SnapshotCollector {
         [pscustomobject]@{ Status = 'Collected'; Error = $null; Data = $data }
     }
     catch {
-        Write-Warning "Could not collect ${Name}: $($_.Exception.Message)"
-        [pscustomobject]@{ Status = 'Failed'; Error = $_.Exception.Message; Data = $null }
+        $message = Get-GraphErrorMessage -ErrorRecord $_
+        Write-Warning "Could not collect ${Name}: $message"
+        [pscustomobject]@{ Status = 'Failed'; Error = $message; Data = $null }
     }
+}
+
+function Get-GraphErrorMessage {
+    # Graph puts the useful reason (for example a missing license) in the response body, not the status line.
+    param ([Parameter(Mandatory)] [System.Management.Automation.ErrorRecord] $ErrorRecord)
+
+    $message = $ErrorRecord.Exception.Message
+    $body = if ($ErrorRecord.ErrorDetails) { $ErrorRecord.ErrorDetails.Message } else { $null }
+    if ($body) {
+        try {
+            $graphError = Get-PropertyValue ($body | ConvertFrom-Json -ErrorAction Stop) 'error'
+            $code = Get-PropertyValue $graphError 'code'
+            $detail = Get-PropertyValue $graphError 'message'
+            if ($code -or $detail) {
+                return "$message Graph error $($code): $detail".Trim()
+            }
+        }
+        catch {
+            Write-Verbose "Error body was not Graph JSON: $body"
+        }
+        if ($body -ne $message) {
+            return "$message $body".Trim()
+        }
+    }
+    $message
 }
 
 function Invoke-GraphCollection {
@@ -34,19 +60,27 @@ function Invoke-GraphCollection {
 }
 
 function Invoke-RoleScheduleCollection {
-    # Reads PIM schedule instances for Global Administrator. Expanding the principal gives names and
-    # object types; if a tenant rejects the expansion, the plain instances are still useful.
+    # Reads PIM schedule instances for Global Administrator. The role is filtered locally because a
+    # server-side $filter was rejected with 400 Bad Request in a live tenant; the full list is small.
+    # Expanding the principal gives names and object types; if a tenant rejects the expansion, the
+    # plain instances are still useful.
     param ([Parameter(Mandatory)] [ValidateSet('roleAssignmentScheduleInstances', 'roleEligibilityScheduleInstances')] [string] $Resource)
 
-    $filter = "`$filter=roleDefinitionId%20eq%20'$($script:GlobalAdministratorRoleTemplateId)'"
-    $uri = "v1.0/roleManagement/directory/${Resource}?$filter"
+    $uri = "v1.0/roleManagement/directory/$Resource"
     try {
-        Invoke-GraphCollection -Uri "$uri&`$expand=principal"
+        $instances = Invoke-GraphCollection -Uri "${uri}?`$expand=principal"
     }
     catch {
-        Write-Verbose "Retrying $Resource without principal expansion: $($_.Exception.Message)"
-        Invoke-GraphCollection -Uri $uri
+        $expandError = Get-GraphErrorMessage -ErrorRecord $_
+        Write-Verbose "Retrying $Resource without principal expansion: $expandError"
+        try {
+            $instances = Invoke-GraphCollection -Uri $uri
+        }
+        catch {
+            throw "With principal expansion: $expandError Without: $(Get-GraphErrorMessage -ErrorRecord $_)"
+        }
     }
+    , @($instances | Where-Object { (Get-PropertyValue $_ 'roleDefinitionId') -eq $script:GlobalAdministratorRoleTemplateId })
 }
 
 function Get-CollectedItem {

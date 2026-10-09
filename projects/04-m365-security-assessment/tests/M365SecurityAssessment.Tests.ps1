@@ -287,9 +287,11 @@ Describe 'Baseline MFA and legacy authentication checks' {
     It 'fails ID-001 when no defaults or enabled policy enforce MFA, ignoring disabled policies' {
         $snapshot = New-TestSnapshot
         Disable-SecurityDefault $snapshot
-        $snapshot.Sources.ConditionalAccessPolicies.Data = @(New-TestPolicy -State 'disabled')
+        $snapshot.Sources.ConditionalAccessPolicies.Data = @(New-TestPolicy -Name 'Require MFA (off)' -State 'disabled')
 
-        (Get-TestFinding $snapshot 'ID-001').Status | Should Be 'Fail'
+        $finding = Get-TestFinding $snapshot 'ID-001'
+        $finding.Status | Should Be 'Fail'
+        $finding.Observed | Should Match "Policy 'Require MFA \(off\)' would meet this check but is turned off\.$"
     }
 
     It 'reports NotAssessed when security defaults are off and policies could not be read' {
@@ -813,9 +815,16 @@ Describe 'Get-M365SecuritySnapshot' {
                 '*authenticationMethodsPolicy' { [pscustomobject]@{ policyMigrationState = 'migrationComplete'; authenticationMethodConfigurations = @() }; break }
                 '*directoryRoles*' { [pscustomobject]@{ value = @([pscustomobject]@{ '@odata.type' = '#microsoft.graph.group'; id = 'g1'; displayName = 'Tier 0' }) }; break }
                 '*roleAssignmentScheduleInstances*expand=principal' { throw 'Response status code does not indicate success: BadRequest (Bad Request).' }
-                '*roleAssignmentScheduleInstances*' { [pscustomobject]@{ value = @([pscustomobject]@{ principalId = 'u1'; assignmentType = 'Assigned' }) }; break }
+                '*roleAssignmentScheduleInstances' {
+                    [pscustomobject]@{ value = @(
+                            [pscustomobject]@{ principalId = 'u1'; roleDefinitionId = '62e90394-69f5-4237-9190-012177145e10'; assignmentType = 'Assigned' }
+                            [pscustomobject]@{ principalId = 'u9'; roleDefinitionId = 'another-role'; assignmentType = 'Assigned' }
+                        )
+                    }
+                    break
+                }
                 '*roleEligibilityScheduleInstances*' {
-                    [pscustomobject]@{ value = @([pscustomobject]@{ principalId = 'g2'; principal = [pscustomobject]@{ '@odata.type' = '#microsoft.graph.group'; id = 'g2'; displayName = 'PIM Admins' } }) }
+                    [pscustomobject]@{ value = @([pscustomobject]@{ principalId = 'g2'; roleDefinitionId = '62e90394-69f5-4237-9190-012177145e10'; principal = [pscustomobject]@{ '@odata.type' = '#microsoft.graph.group'; id = 'g2'; displayName = 'PIM Admins' } }) }
                     break
                 }
                 '*groups/g1/transitiveMembers*' { [pscustomobject]@{ value = @([pscustomobject]@{ id = 'm1'; userPrincipalName = 'm1@lab.example' }) }; break }
@@ -831,19 +840,43 @@ Describe 'Get-M365SecuritySnapshot' {
         $snapshot.TenantId | Should Be 'tenant-1'
         @($snapshot.Sources.ConditionalAccessPolicies.Data).Count | Should Be 2
         $snapshot.Sources.AuthorizationPolicy.Data.allowInvitesFrom | Should Be 'none'
+        $snapshot.Sources.GlobalAdminAssignments.Error | Should BeNullOrEmpty
         $snapshot.Sources.GlobalAdminAssignments.Status | Should Be 'Collected'
-        @($snapshot.Sources.GlobalAdminAssignments.Data)[0].principalId | Should Be 'u1'
+        (@($snapshot.Sources.GlobalAdminAssignments.Data).principalId -join ',') | Should Be 'u1'
         (@($snapshot.Sources.GlobalAdminGroupMembers.Data).id -join ',') | Should Be 'g1,g2'
         $snapshot.Sources.UserRegistrationDetails.Status | Should Be 'Failed'
         $snapshot.Sources.UserRegistrationDetails.Error | Should Match 'Forbidden'
         Assert-MockCalled Invoke-MgGraphRequest -ModuleName M365SecurityAssessment -Times 12 -Exactly
         Assert-MockCalled Invoke-MgGraphRequest -ModuleName M365SecurityAssessment -Times 1 -Exactly -ParameterFilter {
-            $Uri -like "*roleEligibilityScheduleInstances?`$filter=roleDefinitionId%20eq%20'62e90394-69f5-4237-9190-012177145e10'&`$expand=principal"
+            $Uri -eq "v1.0/roleManagement/directory/roleEligibilityScheduleInstances?`$expand=principal"
         }
 
         $finding = Get-TestFinding $snapshot 'PRIV-001' @{ Configuration = (New-TestConfiguration -Emergency @()) }
         $finding.Observed | Should Match '^2 user\(s\) can hold Global Administrator: 0 with an active assignment, 0 eligible only through PIM, and 2 through role-assignable groups'
         (Get-TestFinding $snapshot 'ID-003').Status | Should Be 'NotAssessed'
+    }
+
+    It 'records the Graph error code and message from the response body when PIM reads fail' {
+        Mock Get-MgContext -ModuleName M365SecurityAssessment {
+            [pscustomobject]@{ TenantId = 'tenant-1'; Account = 'reader@lab.example'; Scopes = @() }
+        }
+        Mock Invoke-MgGraphRequest -ModuleName M365SecurityAssessment {
+            if ($Uri -like '*ScheduleInstances*') {
+                $record = [System.Management.Automation.ErrorRecord]::new(
+                    [System.Exception]::new('Response status code does not indicate success: BadRequest (Bad Request).'),
+                    'GraphError', 'InvalidOperation', $null)
+                $record.ErrorDetails = [System.Management.Automation.ErrorDetails]::new('{"error":{"code":"AadPremiumLicenseRequired","message":"The tenant needs a Microsoft Entra ID P2 license."}}')
+                throw $record
+            }
+            [pscustomobject]@{ value = @() }
+        }
+
+        $snapshot = Get-M365SecuritySnapshot -WarningAction SilentlyContinue
+        $source = $snapshot.Sources.GlobalAdminEligibility
+
+        $source.Status | Should Be 'Failed'
+        $source.Error | Should Match '^With principal expansion: .*Graph error AadPremiumLicenseRequired: The tenant needs a Microsoft Entra ID P2 license\. Without: '
+        (Get-TestFinding $snapshot 'PRIV-004').Observed | Should Match 'AadPremiumLicenseRequired'
     }
 
     It 'stops with a clear message when Graph is not connected' {
