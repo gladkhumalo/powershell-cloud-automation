@@ -1,6 +1,6 @@
 # PowerShell Cloud Automation Portfolio
 
-Hands-on PowerShell projects for Windows administration, Microsoft 365 reporting, and network diagnostics. Each project has a focused script, run instructions, and a place for tests and examples. Projects 01–03 have v0.1 implementations, Projects 04 and 07 have v0.2, and the remaining projects are planned.
+These are hands-on PowerShell projects for Windows administration, Microsoft 365 reporting, and network diagnostics. Each project has a focused script, run instructions, and a place for tests and examples. Projects 01–03 have v0.1 implementations, Projects 04 and 07 have v0.2, and the remaining projects are planned.
 
 ## Try a project
 
