@@ -32,6 +32,7 @@ function Get-GlobalAdminPrincipal {
     $users = [ordered]@{}
     $groups = [ordered]@{}
     $servicePrincipals = [System.Collections.Generic.List[string]]::new()
+    $unresolvedPrincipals = [System.Collections.Generic.List[string]]::new()
     $notes = [System.Collections.Generic.List[string]]::new()
 
     $addUser = {
@@ -69,6 +70,12 @@ function Get-GlobalAdminPrincipal {
         foreach ($instance in @(Get-SourceItem -Source $eligibility)) {
             $principal = Get-PropertyValue $instance 'principal'
             $id = [string] (Get-PropertyValue $instance 'principalId')
+            if (-not $principal) {
+                # An unexpanded ID could identify a user, group, or service principal.
+                # Counting it as one user could hide every member of an eligible group.
+                if (-not $unresolvedPrincipals.Contains($id)) { $unresolvedPrincipals.Add($id) }
+                continue
+            }
             $type = Get-ObjectTypeName $principal
             if ($type -eq 'group') {
                 $groups[$id] = [string] (Get-PropertyValue $principal 'displayName')
@@ -99,10 +106,11 @@ function Get-GlobalAdminPrincipal {
     }
 
     [pscustomobject]@{
-        Users             = @($users.Values)
-        UnexpandedGroups  = @($unexpanded)
-        ServicePrincipals = @($servicePrincipals)
-        Notes             = @($notes)
+        Users                = @($users.Values)
+        UnexpandedGroups     = @($unexpanded)
+        UnresolvedPrincipals = @($unresolvedPrincipals)
+        ServicePrincipals    = @($servicePrincipals)
+        Notes                = @($notes)
     }
 }
 
@@ -135,6 +143,11 @@ function Test-GlobalAdministratorCount {
         $admins.UnexpandedGroups | ForEach-Object { $extra.Add("group: $_") }
         if ($status -eq 'Pass') { $status = 'Warn' }
     }
+    if ($admins.UnresolvedPrincipals.Count -gt 0) {
+        $observed += " $($admins.UnresolvedPrincipals.Count) PIM-eligible principal(s) could not be identified as users, groups, or applications; the user count may be understated."
+        $admins.UnresolvedPrincipals | ForEach-Object { $extra.Add("unresolved principal: $_") }
+        if ($status -eq 'Pass') { $status = 'Warn' }
+    }
     if ($admins.ServicePrincipals.Count -gt 0) {
         $observed += " $($admins.ServicePrincipals.Count) application or service principal assignment(s) also hold the role."
         $admins.ServicePrincipals | ForEach-Object { $extra.Add($_) }
@@ -143,6 +156,7 @@ function Test-GlobalAdministratorCount {
     foreach ($note in $admins.Notes) {
         $observed += " $note"
     }
+    if ($admins.Notes.Count -gt 0 -and $status -eq 'Pass') { $status = 'Warn' }
 
     $affected = if ($status -eq 'Pass') { @() } else { @($users | ForEach-Object Label | Sort-Object) + @($extra) }
     New-SecurityFinding -CheckId $checkId -Status $status -Observed $observed -AffectedObjects $affected
@@ -353,6 +367,7 @@ function Test-EmergencyAccess {
     }
     if ($groupOnly.Count -gt 0) {
         $notes.Add("Policies $($groupOnly -join ', ') exclude groups only; confirm an emergency-access account is in an excluded group.")
+        if ($status -eq 'Pass') { $status = 'Warn' }
     }
 
     if ($status -eq 'Pass') {

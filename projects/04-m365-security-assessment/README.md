@@ -38,11 +38,11 @@ In the sample, someone switched the all-users MFA policy to report-only, added a
 | ID-003 | Members are registered for MFA | Medium | ≥ 95% of member accounts | ≥ 80% | < 80% | — |
 | ID-004 | Weak authentication methods are disabled | Medium | SMS, voice call, and email OTP disabled; migration complete | Any of them enabled, or the methods migration is incomplete | — | MS.AAD.3.5v2, MS.AAD.3.4v1 |
 | ID-005 | Self-service password reset is enabled and registered | Low | ≥ 95% of SSPR-enabled non-admin members registered, and all are enabled | SSPR off, scoped to some members, or ≥ 80% registered | < 80% | — |
-| PRIV-001 | Global Administrator count is within range | High | 2–4 people can hold the role (active, PIM-eligible, or through a group) | Fewer than 2, or group members or service principals could not be counted | More than 4 | MS.AAD.7.1v1 |
+| PRIV-001 | Global Administrator count is within range | High | 2–4 people can hold the role (active, PIM-eligible, or through a group) | Fewer than 2, or PIM eligibility or group membership could not be counted fully | More than 4 | MS.AAD.7.1v1 |
 | PRIV-002 | Administrators are registered for MFA | High | Every admin registered | — | Any admin unregistered | — |
 | PRIV-003 | Administrators have phishing-resistant methods | Medium | Every admin has FIDO2, a passkey, or Windows Hello for Business | Any admin without one | — | MS.AAD.3.6v1 |
 | PRIV-004 | Global Administrator access is just-in-time | Medium | Only emergency-access accounts have permanent assignments | Anyone else has standing (non-PIM) access | — | MS.AAD.7.4v1 |
-| PRIV-005 | Emergency access is protected from lockout | High | Configured accounts hold Global Administrator, one is excluded from every policy that applies to them, nobody else is excluded | A policy applies to every emergency account, other users are excluded, or only one account is configured | A configured account doesn't hold the role | — |
+| PRIV-005 | Emergency access is protected from lockout | High | Configured accounts hold Global Administrator, one is excluded from every policy that applies to them, nobody else is excluded | A policy applies to every emergency account, exclusions rely on unverified group membership, other users are excluded, or only one account is configured | A configured account doesn't hold the role | — |
 | APP-001 | User consent to applications is restricted | High | User consent disabled | Consent limited by a policy such as `microsoft-user-default-low` | Legacy policy: users can consent to any app | MS.AAD.5.2v1 |
 | APP-002 | Users cannot register applications | Medium | Disabled | Enabled | — | MS.AAD.5.1v1 |
 | COLLAB-001 | Guest invitations are restricted | Medium | Admins and Guest Inviters only, or disabled | All members can invite | Everyone, including guests, can invite | MS.AAD.8.2v1 |
@@ -202,12 +202,13 @@ The timestamp is the collection time in UTC. Reports and snapshots contain tenan
 - **Policy intent, not sign-in outcome.** The Conditional Access checks look for tenant-wide policies. They do not simulate every sign-in, network location, or exclusion.
 - **Group exclusions are not expanded.** PRIV-005 notes policies that exclude only groups but cannot confirm an emergency account is in the group.
 - **Registration data omits disabled users.** Microsoft's report excludes disabled accounts. Unlicensed shared mailboxes and service accounts may still appear as unregistered members.
+- **PIM data may be incomplete.** When eligibility collection fails or an eligible assignment has only a principal ID, PRIV-001 warns because the user count may be understated. Review the assignments in Entra ID before treating the count as complete.
 - **Phishing-resistant methods** are identified by registered method names (`fido2`, `windowsHelloForBusiness`, `passKey*`). Certificate-based authentication is not counted yet.
 - **Configuration baseline only.** It does not cover Exchange Online, SharePoint, Teams, Defender, Intune, or audit log settings.
 
 ## Validation
 
-The offline Pester suite has 59 tests. They cover:
+The offline Pester suite covers:
 
 - Every check's Pass, Warn, Fail, and NotAssessed branches, plus threshold boundaries.
 - PIM eligibility and group expansion with de-duplication, and emergency-access lockout and extra-exclusion detection.
@@ -219,7 +220,7 @@ Import-Module Pester -RequiredVersion 3.4.0
 Invoke-Pester ./projects/04-m365-security-assessment/tests/M365SecurityAssessment.Tests.ps1
 ```
 
-All 77 repository tests pass with PowerShell 7.6.6 and Pester 3.4.0, and GitHub Actions runs them on pull requests and pushes to `main`. PSScriptAnalyzer reports no findings apart from deliberate `Write-Host` console progress and in-memory `New-*` helpers. **Live tenant run (test tenant, 2026-10-09):**
+GitHub Actions runs the repository tests on pull requests and pushes to `main`. PSScriptAnalyzer reports no findings apart from deliberate `Write-Host` console progress and in-memory `New-*` helpers. **Live tenant run (test tenant, 2026-10-09):**
 
 - Sign-in, consent, and collection worked, and 12 of 14 checks were assessed. The findings matched the tenant's configuration.
 - Two problems found and fixed:

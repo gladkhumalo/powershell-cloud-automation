@@ -243,7 +243,7 @@ Describe 'Get-M365SecurityFinding' {
 
         ($findings | Where-Object CheckId -EQ 'ID-004').Status | Should Be 'NotAssessed'
         ($findings | Where-Object CheckId -EQ 'PRIV-004').Status | Should Be 'NotAssessed'
-        ($findings | Where-Object CheckId -EQ 'PRIV-001').Status | Should Be 'Pass'
+        ($findings | Where-Object CheckId -EQ 'PRIV-001').Status | Should Be 'Warn'
         ($findings | Where-Object CheckId -EQ 'PRIV-001').Observed | Should Match 'Eligible \(PIM\) assignments are not included'
     }
 }
@@ -440,6 +440,30 @@ Describe 'Privileged access checks' {
         $finding.AffectedObjects -contains 'group: Tier 0 Admins' | Should Be $true
     }
 
+    It 'does not count an unexpanded PIM principal as one user' {
+        $snapshot = New-TestSnapshot
+        $snapshot.Sources.GlobalAdminEligibility.Data = @(
+            [pscustomobject]@{ principalId = 'unknown-group'; roleDefinitionId = $globalAdminRole }
+        )
+
+        $finding = Get-TestFinding $snapshot 'PRIV-001'
+
+        $finding.Status | Should Be 'Warn'
+        $finding.Observed | Should Match '^2 user\(s\) can hold Global Administrator:'
+        $finding.Observed | Should Match 'user count may be understated'
+        $finding.AffectedObjects -contains 'unresolved principal: unknown-group' | Should Be $true
+    }
+
+    It 'warns when PIM eligibility was not collected' {
+        $snapshot = New-TestSnapshot
+        $snapshot.Sources.GlobalAdminEligibility = New-TestSource $null -Status 'Failed' -ErrorMessage 'Forbidden'
+
+        $finding = Get-TestFinding $snapshot 'PRIV-001'
+
+        $finding.Status | Should Be 'Warn'
+        $finding.Observed | Should Match 'Eligible \(PIM\) assignments are not included'
+    }
+
     It 'fails PRIV-002 and lists administrators without MFA registration' {
         $snapshot = New-TestSnapshot
         $snapshot.Sources.UserRegistrationDetails.Data += New-TestRegistration -Upn 'noreg.admin@lab.example' -IsAdmin $true -IsMfaRegistered $false -Methods @()
@@ -540,6 +564,18 @@ Describe 'Privileged access checks' {
         $finding.Status | Should Be 'Warn'
         $finding.AffectedObjects | Should Be 'user3@lab.example'
         $finding.Observed | Should Match "'Require MFA' \(user3@lab.example\)"
+    }
+
+    It 'warns when emergency access depends on an unverified group exclusion' {
+        $snapshot = New-TestSnapshot
+        $snapshot.Sources.ConditionalAccessPolicies.Data = @(
+            New-TestPolicy -Name 'Exclude emergency group' -ExcludeGroups @('group-bg')
+        )
+
+        $finding = Get-TestFinding $snapshot 'PRIV-005'
+
+        $finding.Status | Should Be 'Warn'
+        $finding.Observed | Should Match "'Exclude emergency group' exclude groups only"
     }
 
     It 'passes PRIV-005 when an emergency account is excluded from every policy that applies to it' {
