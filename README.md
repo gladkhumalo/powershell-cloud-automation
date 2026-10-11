@@ -28,7 +28,7 @@ Live Microsoft 365 runs require Graph modules and a tenant sign-in. Start with t
 Invoke-Pester ./projects/01-m365-user-audit/tests/Export-M365UserReport.Tests.ps1, ./projects/02-workstation-health-check/tests/Get-WorkstationHealth.Tests.ps1, ./projects/03-m365-license-audit/tests/Export-M365LicenseReport.Tests.ps1, ./projects/04-m365-security-assessment/tests/M365SecurityAssessment.Tests.ps1, ./projects/07-network-diagnostics-toolkit/tests/NetworkDiagnostics.Tests.ps1
 ```
 
-GitHub Actions runs those tests on pushes and pull requests to `main`. The Graph connection still needs a manual tenant check.
+GitHub Actions runs those tests on pushes and pull requests to `main`. Project 04 was run against a test tenant on 2026-10-09; its PIM collection fix still needs a live rerun. See the project's validation notes for details.
 
 ## Projects
 
@@ -50,7 +50,7 @@ GitHub Actions runs those tests on pushes and pull requests to `main`. The Graph
 - `modules/` — future reusable module structure
 - `scripts/` — future standalone scripts by topic
 - `sample-data/` — safe, fictional test data when needed
-- `.github/` — future workflows and contribution templates
+- `.github/` — test workflow and contribution templates
 - `config/` — example settings; per-tenant assessment files are excluded from Git
 
 Each project has `src/`, `tests/`, `examples/`, `output/`, and `screenshots/` folders. Empty folders contain `.gitkeep` files. Generated reports in `output/` are ignored by Git.
