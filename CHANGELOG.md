@@ -1,6 +1,8 @@
-# Changelog
+﻿# Changelog
 
 ## Unreleased
+
+- Added Project 05 v0.1: Azure resource inventory across selected subscriptions, CSV and JSON exports, fictional offline snapshots, context restoration, and seven offline/mocked Pester tests. Live Azure validation remains pending.
 
 - Fixed Project 04 issues found in the first live tenant run: PIM schedule instances are now read without a server-side filter (400 Bad Request) and filtered locally, failed sources record the Graph error code and message, and baseline checks name matching Conditional Access policies that are turned off.
 - Added Project 04 v0.2: four new checks (weak authentication methods, SSPR, standing Global Administrator access, and emergency-access lockout protection), PIM-eligible and group-based Global Administrator counting, a per-tenant configuration file with accepted risks that expire, snapshot drift comparison in the HTML/CSV/JSON reports, CISA SCuBA baseline IDs on findings, `-FailOnSeverity` exit codes, and a Public/Private module layout with 59 offline tests.
